@@ -1,0 +1,24 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+uploads/
+recycle_bin/
+
+# Node/React
+node_modules/
+build/
+dist/
+.env
+
+# Mac OS
+.DS_Store
+
+# General
+*.zip
+*.tar.gz
+*.mp4
+*.mov
+*.pdf
+Back-end/app/config/ServiceAccountKey.json

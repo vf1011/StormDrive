@@ -1,0 +1,521 @@
+/* ========= Theme Variables ========= */
+:root[data-theme='dark'] {
+  --primary-bg: var(--bg-primary-dark);
+  --secondary-bg: var(--bg-secondary-dark);
+  --accent-blue: var(--accent-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --card-bg: var(--card-bg-dark);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --border-color: var(--border-dark);
+  --hover-bg: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme='light'] {
+  --primary-bg: var(--bg-primary-light);
+  --secondary-bg: var(--bg-secondary-light);
+  --accent-blue: var(--accent-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --card-bg: var(--card-bg-light);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --border-color: var(--border-light);
+  --hover-bg: rgba(20, 13, 63, 0.08);
+}
+/* 
+:root {
+  --sidebar-w: 260px;     
+  --sidebar-w-collapsed: 100px; 
+}
+
+body, html {
+  max-width: 1000vw;
+  overflow-x: hidden !important;
+}
+
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #F8FAFC;
+  color: var(--text-primary);
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.sidebar {
+  width: 240px;
+  background: var(--secondary-bg);
+  padding: 1.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s;
+  border-right: 1px solid var(--accent);
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  z-index: 300;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.sidebar.collapsed { width: 80px; }
+@media (max-width: 900px) {
+  .sidebar { width: 64px; }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none !important; }
+}
+
+.sidebar.collapsed { width: var(--sidebar-w-collapsed); }
+
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  transition: margin-left 0.3s;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.sidebar.collapsed + .dashboard-main {
+   margin-left: var(--sidebar-w-collapsed); 
+
+  }
+@media (max-width: 900px) {
+  .dashboard-main { margin-left: 80px; }
+}
+@media (max-width: 768px) {
+  .dashboard-main { margin-left: 0; }
+}
+
+.dashboard-navbar-section,
+.dashboard-quote-section {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 200;
+  background: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dashboard-navbar-section {
+  padding: 0 2rem;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+}
+.dashboard-quote-section {
+  padding: 0 2rem;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+
+@media (max-width: 900px) {
+  .dashboard-navbar-section, .dashboard-quote-section {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    border-radius: 0.75rem !important;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-navbar-section, .dashboard-quote-section {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+    border-radius: 0.75rem !important;
+  }
+}
+
+.nav-menu{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+
+.dashboard-content-section {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;      
+  display: flex;
+  flex-direction: column;
+  padding: 0;           
+}
+@media (max-width: 768px) {
+  .dashboard-content-section { padding: 0; }
+}
+@media (max-width: 480px) {
+  .dashboard-content-section { padding: 0; }
+}
+
+.file-display {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-radius: 24px;
+  border: 1px solid var(--accent);
+  overflow: hidden;
+  transition: all 0.3s;
+  box-sizing: border-box;
+  margin-top:20px;
+  margin-right:20px;
+}
+.sidebar.collapsed ~ .dashboard-main .file-display {
+  max-width: 100%;
+  margin: 0 30px 0 0;
+  margin-top:20px;
+}
+@media (max-width: 1200px) {
+  .file-display { border-radius: 24px; }
+}
+@media (max-width: 1199px) and (min-width: 769px) {
+  .file-display { border-radius: 20px; }
+}
+@media (max-width: 768px) {
+  .file-display { border-radius: 16px; margin: 0; }
+}
+@media (max-width: 480px) {
+  .file-display { border-radius: 12px; margin: 0; }
+}
+
+
+.scrollable-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem;
+}
+@media (max-width: 768px) {
+  .scrollable-content { padding: 1rem; }
+}
+@media (max-width: 480px) {
+  .scrollable-content { padding: 0.5rem; }
+}
+
+.dashboard, .dashboard-main, .file-display, .scrollable-content, .quote-box {
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  max-width:100%;
+}
+
+.scrollable-content::-webkit-scrollbar { width: 8px; }
+@media (max-width: 768px) { .scrollable-content::-webkit-scrollbar { width: 6px; } }
+@media (max-width: 480px) { .scrollable-content::-webkit-scrollbar { width: 4px; } }
+.scrollable-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--accent, #3b82f6); border-radius: 4px; opacity: 0.7;
+}
+.scrollable-content::-webkit-scrollbar-thumb:hover { opacity: 1; }
+
+
+.mobile-menu-button {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  .mobile-menu-button { display: block; }
+}
+
+
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+.mobile-menu-content {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 280px;
+  background: var(--secondary-bg);
+  padding: 2rem 1rem;
+  z-index: 10000;
+}
+
+
+@media (max-width: 768px) {
+  .dashboard-content-section > .file-display {
+    margin-top: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .dashboard-content-section > .file-display {
+    margin-top: 10px;
+  }
+}
+ */
+
+
+ :root {
+  /* Sidebar widths */
+  --sidebar-w: 260px;            /* expanded width */
+  --sidebar-w-collapsed: 100px;  /* collapsed (icon rail) */
+
+  /* Sticky bars (tweak if your nav/quote sizes differ) */
+  --nav-h: 64px;
+  --quote-h: 56px;
+
+  /* Spacing */
+  --page-x: 20px;
+}
+
+/* ---- Page shell ---- */
+.dashboard {
+  display: flex;
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--bg);
+}
+
+/* ---- Sidebar ---- */
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--secondary-bg);
+  padding: 1.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s;
+  border-right: 1px solid var(--accent);
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  z-index: 300;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.toggle-btn{
+  background:transparent;
+  border:none;
+  color:var(--text-secondary);
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+.nav-menu{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* ---- Main column (everything besides sidebar) ---- */
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;       /* was 100vh */
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  transition: margin-left 0.3s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--bg);
+}
+
+/* When the sidebar DOM is directly before main: */
+.sidebar.collapsed + .dashboard-main {
+  margin-left: var(--sidebar-w-collapsed);
+}
+
+/* ---- Sticky top bars ---- */
+.dashboard-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  box-sizing: border-box;
+  background: var(--bg-secondary);
+}
+
+/* The motivational / quote strip just under nav */
+.quote-box-wrapper {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 90;
+  height: var(--quote-h);
+  box-sizing: border-box;
+  background: var(--bg-secondary);
+}
+
+/* ---- Content area (below sticky bars) ---- */
+.dashboard-content-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;          /* critical so children can scroll */
+  padding: 0 var(--page-x);
+  overflow: hidden;        /* the scroller is the child below */
+}
+
+/* The area that actually scrolls */
+.scrollable-content {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* Light, consistent spacing for the first FileDisplay panel */
+.dashboard-content-section > .file-display {
+  margin-top: 20px;
+}
+
+/* =========================================
+   RESPONSIVE BREAKPOINTS
+   ========================================= */
+
+/* <= 900px: slightly narrower rails */
+@media (max-width: 900px) {
+  :root {
+    --sidebar-w: 220px;
+    --sidebar-w-collapsed: 80px;
+    --page-x: 16px;
+  }
+}
+
+/* <= 768px: mobile – sidebar usually overlays, content full width */
+@media (max-width: 768px) {
+  :root {
+    --page-x: 14px;
+    --nav-h: 60px;
+    --quote-h: 52px;
+  }
+
+  /* Give content full width; open/close of the sidebar becomes overlay logic in your JS */
+  .dashboard-main {
+    margin-left: 0;
+  }
+
+  /* Optional: if your collapsed state is used on tablets, keep it small */
+  .sidebar.collapsed {
+    width: var(--sidebar-w-collapsed);
+  }
+
+  .dashboard-content-section > .file-display {
+    margin-top: 16px;
+  }
+}
+
+/* <= 480px: tighter padding */
+@media (max-width: 480px) {
+  :root {
+    --page-x: 12px;
+    --nav-h: 56px;
+    --quote-h: 48px;
+  }
+
+  .dashboard-content-section > .file-display {
+    margin-top: 12px;
+  }
+}
+
+/* ===== Leave Modal Styles ===== */
+.leave-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55); /* semi-transparent dark */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.leave-modal-content {
+  background: var(--secondary-bg);
+  color: var(--text-primary);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px var(--shadow-color);
+  width: 90%;
+  max-width: 420px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: scaleIn 0.2s ease;
+}
+
+.leave-modal-header {
+  margin-bottom: 0.5rem;
+}
+
+.leave-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.leave-modal-body {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+
+.leave-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.leave-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.leave-btn.cancel {
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+.leave-btn.cancel:hover {
+  background: var(--hover-bg);
+}
+
+.leave-btn.confirm {
+  background: var(--accent-blue);
+  color: white;
+}
+.leave-btn.confirm:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+

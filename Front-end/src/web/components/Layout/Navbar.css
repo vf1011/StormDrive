@@ -1,0 +1,542 @@
+/* .header {
+  padding: 2rem 3rem;
+  background: transparent;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.dark-mode .header {
+  background: transparent;
+}
+
+.header.dark-mode .nav-links a,
+.header.dark-mode .logo span {
+  color: white;
+}
+
+.navbar {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.logo img {
+  height: 70px;
+  width: auto;
+}
+
+.logo span {
+  transition: color 0.3s ease;
+  color: var(--text-primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.nav-links a:hover {
+  color: var(--accent);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.toggle {
+  background-color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.input {
+  display: none;
+}
+
+.toggle .icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s, transform 0.3s;
+  color: #1a1a1a;
+}
+
+.icon {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  transition: transform 500ms;
+  width: 20px;
+  height: 20px;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.icon--moon {
+  transition-delay: 100ms;
+}
+
+.icon--sun {
+  transform: scale(0);
+}
+
+.input:checked + .icon--moon {
+  transform: rotate(360deg) scale(0);
+}
+
+.input:checked ~ .icon--sun {
+  transition-delay: 200ms;
+  transform: scale(1) rotate(360deg);
+}
+
+.toggle:hover .icon {
+  border-color: #3182ce;
+}
+
+/* Dark mode styles */
+/* body.dark-mode {
+  background: transparent
+}
+
+.header.dark-mode {
+  background: transparent;
+}
+
+.header.dark-mode .nav-links a,
+.header.dark-mode .logo span {
+  color: white;
+} */ */
+
+/* Updated Navbar.css - Fixed Transparency */
+.header {
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 2rem 3rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+/* Default navbar (for all pages except About) */
+.header.navbar-solid {
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+/* Transparent navbar (only for About page) - Higher specificity */
+.header.navbar-transparent {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-bottom: none !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Dark mode solid navbar *
+
+/* Dark mode transparent navbar - Ensure it stays transparent */
+.header.dark-mode.navbar-transparent {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.navbar {
+  max-width: 1200px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.logo img {
+  height: 70px;
+  width: auto;
+}
+
+.logo span {
+  font-size: 1.25rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+/* Logo text colors - More specific selectors */
+.header.navbar-solid .logo span {
+  color: #1a1a1a !important;
+}
+
+.header.navbar-transparent .logo span {
+  color: white !important;
+}
+
+.header.dark-mode.navbar-solid .logo span {
+  color: white !important;
+}
+
+.header.dark-mode.navbar-transparent .logo span {
+  color: white !important;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Navigation link colors - More specific selectors */
+.header.navbar-solid .nav-links a {
+  color: #374151 !important;
+}
+
+.header.navbar-solid .nav-links a:hover {
+  color: #3b82f6 !important;
+}
+
+.header.navbar-transparent .nav-links a {
+  color: white !important;
+}
+.header.navbar-transparent .logo {
+    color: white !important;
+}
+
+.header.navbar-transparent .nav-links a:hover {
+  color: #93c5fd !important;
+}
+
+.header.dark-mode.navbar-solid .nav-links a {
+  color: white !important;
+}
+
+.header.dark-mode.navbar-solid .nav-links a:hover {
+  color: #60a5fa !important;
+}
+
+.header.dark-mode.navbar-transparent .nav-links a {
+  color: white !important;
+}
+.header.navbar-transparent .nav-links a {
+    color: white !important;
+}
+
+.header.dark-mode.navbar-transparent .nav-links a:hover {
+  color: #93c5fd !important;
+}
+
+/* Active page indicator for About page */
+.header.navbar-transparent .nav-links a.active {
+  border-bottom: 2px solid white;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-right: 1rem;
+}
+
+.toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Theme toggle - More specific selectors */
+.header.navbar-solid .toggle {
+  background-color: #f3f4f6 !important;
+}
+
+.header.navbar-solid .toggle:hover {
+  background-color: #e5e7eb !important;
+}
+
+.header.navbar-transparent .toggle {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.header.navbar-transparent .toggle:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.header.dark-mode.navbar-solid .toggle {
+  background-color: #374151 !important;
+}
+
+.header.dark-mode.navbar-solid .toggle:hover {
+  background-color: #4b5563 !important;
+}
+
+.header.dark-mode.navbar-transparent .toggle {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.header.dark-mode.navbar-transparent .toggle:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.input {
+  display: none;
+}
+
+.toggle .icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.icon--moon {
+  transition-delay: 100ms;
+}
+
+.icon--sun {
+  transform: scale(0);
+}
+
+.input:checked + .icon--moon {
+  transform: rotate(360deg) scale(0);
+}
+
+.input:checked ~ .icon--sun {
+  transition-delay: 200ms;
+  transform: scale(1) rotate(360deg);
+}
+
+/* Icon colors - More specific */
+.header.navbar-solid .toggle .icon {
+  color: #6b7280 !important;
+}
+
+.header.navbar-transparent .toggle .icon {
+  color: white !important;
+}
+
+.header.dark-mode .toggle .icon {
+  color: #d1d5db !important;
+}
+
+/* About page specific styles */
+.about-page-container {
+  position: relative;
+}
+
+.about-page-container .header.navbar-transparent {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: transparent !important;
+}
+
+/* Force transparency override any other styles */
+.about-page .header,
+.about-page-container .header {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .nav-links {
+    gap: 1rem;
+  }
+  
+  .nav-links a {
+    font-size: 0.875rem;
+  }
+  
+  .logo img {
+    height: 50px;
+  }
+}
+
+/* ===== Pill Navbar Overrides (paste at bottom) ===== */
+
+/* Make the header act like a floating container */
+.header.navbar-solid {
+  position: sticky;              /* floats & stays visible */
+  top: 16px;
+  z-index: 1000;
+  padding: 0 16px !important;    /* remove big padding for pill look */
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* The pill itself */
+.header.navbar-solid .navbar {
+  max-width: 1320px;             /* tweak if needed */
+  margin: 0 auto !important;
+
+  height: auto !important;
+  padding: 12px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Logo sizing to match pill height */
+.header.navbar-solid .logo img {
+  height: 50px !important;
+  width: auto;
+}
+
+/* Center links feel */
+.header.navbar-solid .nav-links {
+  gap: 18px !important;
+}
+
+/* Link styling like the reference */
+.header.navbar-solid .nav-links a {
+  color: rgba(15, 23, 42, 0.72) !important;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.header.navbar-solid .nav-links a:hover {
+  color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+
+
+/* Theme toggle to match pill style */
+.header.navbar-solid .toggle {
+  background: rgba(15, 23, 42, 0.06) !important;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  box-shadow: none;
+}
+
+/* About page: keep your existing transparent behavior (no pill) */
+.header.navbar-transparent .navbar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  margin: 0 auto !important;
+}
+
+/* Small screens: prevent overflow */
+@media (max-width: 900px) {
+  .header.navbar-solid .navbar {
+    border-radius: 22px;         /* pill becomes a rounded card */
+  }
+
+  .header.navbar-solid .nav-links {
+    gap: 10px !important;
+  }
+
+  .header.navbar-solid .nav-links a {
+    padding: 7px 8px;
+    font-size: 0.9rem;
+  }
+}

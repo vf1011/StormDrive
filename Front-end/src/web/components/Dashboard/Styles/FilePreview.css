@@ -1,0 +1,1730 @@
+/* FilePreview.css */
+
+:root {
+  --neuro-bg: var(--bg-secondary);
+  --neuro-shadow-dark:rgba(0, 0, 0, 0.3);
+  --neuro-shadow-light:rgba(0, 0, 0, 0.1);
+  --neuro-text: var(--text-primary);
+  --neuro-text-secondary: #7a8599;
+  --neuro-radius: 20px;
+  --neuro-radius-small: 12px;
+  --neuro-radius-large: 30px;
+  --neuro-shadow-offset: 8px;
+  --neuro-shadow-blur: 16px;
+  --neuro-shadow-inset: inset 6px 6px 12px var(--neuro-shadow-dark), inset -6px -6px 12px var(--neuro-shadow-light);
+  --neuro-shadow-raised: 8px 8px 16px var(--neuro-shadow-dark), -8px -8px 16px var(--neuro-shadow-light);
+  --neuro-transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.file-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Neumorphism Theme Override */
+/* .file-preview-overlay.neuro-theme {
+  background: var(--neuro-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+} */
+
+.file-preview-overlay.neuro-theme.fullscreen {
+  padding: 0;
+}
+
+.file-preview-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+
+/* Neumorphism Theme Override */
+.neuro-theme .file-preview-modal {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius-large);
+  border: none;
+  max-height: 700px;
+  transition: var(--neuro-transition);
+}
+
+.neuro-theme .file-preview-modal.fullscreen-modal {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+
+.preview-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1e5e9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  flex-shrink: 0; /* Prevent header from shrinking */
+  gap:20px;
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .preview-header {
+  padding: 25px 30px;
+  background: var(--neuro-bg);
+  border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+  position: relative;
+}
+
+.neuro-theme .preview-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30px;
+  right: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(163, 177, 198, 0.3), transparent);
+}
+
+
+.preview-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.preview-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.neuro-theme .preview-title h3 {
+  color: var(--neuro-text);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.neuro-theme .preview-actions {
+  gap: 12px;
+}
+
+.preview-btn {
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #f1f3f4;
+  color: #5f6368;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.preview-btn:hover {
+  background: #e8eaed;
+  color: #202124;
+  transform: translateY(-1px);
+}
+
+.preview-btn:active {
+  transform: translateY(0);
+}
+
+.preview-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.preview-btn:disabled:hover {
+  background: #f1f3f4;
+  color: #5f6368;
+  transform: none;
+}
+
+
+/* Neumorphism Theme Override */
+.neuro-theme .preview-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--neuro-transition);
+  box-shadow: var(--neuro-shadow-raised);
+  padding: 0;
+}
+
+.neuro-theme .preview-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    10px 10px 20px var(--neuro-shadow-dark),
+    -10px -10px 20px var(--neuro-shadow-light);
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+}
+
+.neuro-theme .preview-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--neuro-shadow-inset);
+}
+
+.neuro-theme .preview-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: 
+    4px 4px 8px var(--neuro-shadow-dark),
+    -4px -4px 8px var(--neuro-shadow-light);
+}
+
+.close-btn:hover {
+  background: #fce8e6;
+  color: #d93025;
+}
+
+.download-btn:hover {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+/* Neumorphism Theme Close Button */
+.neuro-theme .preview-btn.close-btn {
+  background: linear-gradient(145deg, #ff6b6b, #ee5a24);
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 
+    var(--neuro-shadow-offset) var(--neuro-shadow-offset) var(--neuro-shadow-blur) var(--neuro-shadow-dark),
+    calc(-1 * var(--neuro-shadow-offset)) calc(-1 * var(--neuro-shadow-offset)) var(--neuro-shadow-blur) var(--neuro-shadow-light),
+    inset 2px 2px 4px rgba(255,255,255,0.2);
+}
+
+.neuro-theme .preview-btn.close-btn:hover {
+  background: linear-gradient(145deg, #ff5252, #e53935);
+}
+
+/* Neumorphism Theme Download Button */
+.neuro-theme .preview-btn.download-btn {
+  background:var(--accent);
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 
+    var(--neuro-shadow-offset) var(--neuro-shadow-offset) var(--neuro-shadow-blur) var(--neuro-shadow-dark),
+    calc(-1 * var(--neuro-shadow-offset)) calc(-1 * var(--neuro-shadow-offset)) var(--neuro-shadow-blur) var(--neuro-shadow-light),
+    inset 2px 2px 4px rgba(255,255,255,0.2);
+}
+
+.neuro-theme .preview-btn.download-btn:hover {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.neuro-theme .zoom-indicator {
+  color: var(--neuro-text-secondary);
+  font-size: 0.9rem;
+  background: var(--neuro-bg);
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: var(--neuro-shadow-inset);
+  margin-left: 15px;
+}
+
+
+.preview-content {
+  flex: 1;
+  padding: 20px;
+  overflow: auto; /* Changed from hidden to auto */
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Enable hardware acceleration for smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+
+.neuro-theme .preview-content {
+  padding: 30px;
+  background: var(--neuro-bg);
+}
+
+.neuro-theme .preview-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 30px;
+  right: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+}
+/* Loading State */
+.preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #5f6368;
+}
+
+.preview-loading p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.neuro-theme .preview-loading {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius);
+  box-shadow: var(--neuro-shadow-inset);
+  padding: 25px;
+  color: var(--neuro-text);
+}
+
+.neuro-theme .preview-loading .animate-spin {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  animation: neuro-spin 2s linear infinite;
+  position: relative;
+}
+
+.neuro-theme .preview-loading .animate-spin::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  background: var(--neuro-bg);
+  border-radius: 50%;
+  box-shadow: var(--neuro-shadow-inset);
+}
+
+@keyframes neuro-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.preview-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #d93025;
+  text-align: center;
+}
+
+.preview-error p {
+  margin: 16px 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.preview-error small {
+  color: #5f6368;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  padding: 8px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background: white;
+  color: #1a73e8;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #f8f9fa;
+  border-color: #1a73e8;
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .preview-error,
+.neuro-theme .preview-unsupported,
+.neuro-theme .preview-empty {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius);
+  box-shadow: var(--neuro-shadow-inset);
+  padding: 25px;
+  color: var(--neuro-text);
+}
+
+.neuro-theme .preview-error svg,
+.neuro-theme .preview-unsupported svg,
+.neuro-theme .preview-empty svg {
+  color: var(--neuro-text);
+  background: var(--neuro-bg);
+  padding: 15px;
+  border-radius: 50%;
+  box-shadow: var(--neuro-shadow-raised);
+  width: 60px;
+  height: 60px;
+}
+
+.neuro-theme .preview-error button,
+.neuro-theme .retry-btn {
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--neuro-radius);
+  font-weight: 500;
+  box-shadow: var(--neuro-shadow-raised);
+  transition: var(--neuro-transition);
+}
+
+.neuro-theme .preview-error button:hover,
+.neuro-theme .retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    10px 10px 20px var(--neuro-shadow-dark),
+    -10px -10px 20px var(--neuro-shadow-light);
+}
+
+.neuro-theme .preview-error button:active,
+.neuro-theme .retry-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--neuro-shadow-inset);
+}
+
+/* Unsupported State */
+.preview-unsupported {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #5f6368;
+  text-align: center;
+}
+
+.preview-unsupported p {
+  margin: 16px 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.preview-unsupported small {
+  color: #9aa0a6;
+}
+
+/* Image Preview */
+.image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  overflow: auto; /* Allow scrolling when zoomed */
+  position: relative;
+}
+
+.preview-image {
+  max-width: none; /* Remove max-width constraint when zoomed */
+  max-height: none; /* Remove max-height constraint when zoomed */
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  display: block;
+}
+
+.preview-image[style*="scale(1)"] {
+  max-width: 100%;
+  max-height: 70vh;
+}
+
+
+/* Neumorphism Theme Override */
+.neuro-theme .image-preview {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius);
+  padding: 25px;
+  min-height: 300px;
+}
+
+.neuro-theme .image-preview img,
+.neuro-theme .preview-image {
+  border-radius: var(--neuro-radius-small);
+  box-shadow: var(--neuro-shadow-raised);
+  transition: transform 0.3s ease;
+}
+
+.neuro-theme .image-preview img:hover,
+.neuro-theme .preview-image:hover {
+  transform: scale(1.02);
+}
+
+.image-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.image-info p {
+  margin: 4px 0;
+}
+
+.neuro-theme .image-info {
+  background: var(--neuro-bg);
+  color: var(--neuro-text-secondary);
+  box-shadow: var(--neuro-shadow-raised);
+  border-radius: var(--neuro-radius-small);
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+/* Video Preview */
+/* Enhanced Video Preview Styling */
+
+/* ========== VIDEO PREVIEW CONTAINER ========== */
+.video-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-preview {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius);
+  box-shadow: var(--neuro-shadow-inset);
+  padding: 25px;
+}
+
+/* ========== VIDEO THUMBNAIL & PLAYER ========== */
+.video-container {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.video-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-container {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius-small);
+  box-shadow: var(--neuro-shadow-raised);
+  transition: transform 0.3s ease;
+}
+
+.neuro-theme .video-container:hover {
+  transform: scale(1.02);
+  box-shadow: 
+    12px 12px 24px var(--neuro-shadow-dark),
+    -12px -12px 24px var(--neuro-shadow-light);
+}
+
+
+.video-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.video-container:hover img {
+  transform: scale(1.02);
+}
+
+/* ========== VIDEO PLAY OVERLAY ========== */
+.video-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+  border-radius: 50%;
+  padding: 24px;
+  color: white;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.video-container:hover .video-overlay {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+  transform: translate(-50%, -50%) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-overlay {
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  box-shadow: var(--neuro-shadow-raised);
+  border: none;
+  backdrop-filter: none;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.neuro-theme .video-container:hover .video-overlay {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 
+    12px 12px 20px var(--neuro-shadow-dark),
+    -12px -12px 20px var(--neuro-shadow-light);
+  background: var(--neuro-bg);
+}
+
+/* Video overlay badges */
+.video-duration-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-duration-badge {
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  box-shadow: var(--neuro-shadow-raised);
+  border: none;
+  border-radius: var(--neuro-radius-small);
+  backdrop-filter: none;
+  font-weight: 500;
+}
+
+
+.video-play-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.neuro-theme .video-play-hint {
+  background: var(--neuro-bg);
+  color: var(--neuro-text-secondary);
+  box-shadow: var(--neuro-shadow-raised);
+  border: none;
+  border-radius: var(--neuro-radius-small);
+  backdrop-filter: none;
+}
+
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ========== VIDEO PLAYER ========== */
+.video-player-container {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+  background: #000;
+}
+
+.neuro-theme .video-player-container {
+  background: var(--neuro-bg);
+  border-radius: var(--neuro-radius-small);
+  box-shadow: var(--neuro-shadow-raised);
+}
+
+
+.video-player-container video {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+/* Back button styling */
+.video-back-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.video-back-button:hover {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-back-button {
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  border: none;
+  box-shadow: var(--neuro-shadow-raised);
+  border-radius: var(--neuro-radius-small);
+  backdrop-filter: none;
+  transition: var(--neuro-transition);
+}
+
+.neuro-theme .video-back-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    6px 6px 12px var(--neuro-shadow-dark),
+    -6px -6px 12px var(--neuro-shadow-light);
+  background: var(--neuro-bg);
+}
+
+
+/* ========== VIDEO INFO PANEL ========== */
+.video-info {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  text-align: left;
+  max-width: 800px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .video-info {
+  background: var(--neuro-bg);
+  border: none;
+  border-radius: var(--neuro-radius-small);
+  box-shadow: var(--neuro-shadow-inset);
+  padding: 20px;
+}
+
+.video-info div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.video-info strong {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 2px;
+}
+
+.neuro-theme .video-info strong {
+  color: var(--neuro-text);
+}
+
+.video-info span {
+  color: #475569;
+  font-size: 16px;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.neuro-theme .video-info span {
+  color: var(--neuro-text-secondary);
+}
+
+
+/* Special styling for file name */
+.video-info div:last-child span {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  background: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== ACTION BUTTONS ========== */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 140px;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.action-btn:hover::before {
+  left: 100%;
+}
+
+.play-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.play-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.play-btn:active {
+  transform: translateY(-1px);
+}
+
+.download-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.download-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.download-btn:active {
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-btn:hover {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #334155;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 768px) {
+  .video-preview {
+    gap: 20px;
+  }
+  
+  .video-container {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  .video-overlay {
+    padding: 20px;
+  }
+  
+  .video-overlay svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .video-info {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .action-btn {
+    width: 100%;
+    max-width: 280px;
+    min-width: unset;
+  }
+  
+  .video-duration-badge,
+  .video-play-hint {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-preview {
+    gap: 16px;
+  }
+  
+  .video-info {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .video-info strong {
+    font-size: 12px;
+  }
+  
+  .video-info span {
+    font-size: 14px;
+  }
+  
+  .action-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .video-back-button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* ========== LOADING STATES ========== */
+.video-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  color: #64748b;
+}
+
+.video-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ========== ACCESSIBILITY ========== */
+@media (prefers-reduced-motion: reduce) {
+  .video-container,
+  .video-overlay,
+  .action-btn,
+  .video-play-hint {
+    transition: none;
+    animation: none;
+  }
+  
+  .video-container:hover {
+    transform: none;
+  }
+  
+  .video-overlay:hover {
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Focus states for keyboard navigation */
+.action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.video-back-button:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ========== HIGH CONTRAST MODE ========== */
+@media (prefers-contrast: high) {
+  .video-info {
+    border: 2px solid #000;
+    background: #fff;
+  }
+  
+  .action-btn {
+    border: 2px solid currentColor;
+  }
+  
+  .video-overlay {
+    border: 3px solid #fff;
+  }
+}
+
+.pdf-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pdf-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Small gap between pages like real PDF */
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  padding: 20px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  align-items: center; /* Center the pages */
+}
+
+.pdf-page-image-only {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  display: block;
+  /* Make images large like real PDF viewer */
+  min-width: 600px;
+  background: white;
+  border: 1px solid #ddd;
+}
+
+.neuro-theme .pdf-page-image-only {
+  border: none;
+  border-radius: var(--neuro-radius-small);
+  box-shadow: var(--neuro-shadow-raised);
+  transition: transform 0.3s ease;
+  padding: 10px;
+  background: var(--neuro-bg);
+}
+
+.neuro-theme .pdf-page-image-only:hover {
+  transform: scale(1.02);
+}
+
+
+/* Optional zoom info */
+.pdf-zoom-info {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 10;
+  opacity: 0.8;
+}
+
+/* .neuro-theme .pdf-zoom-info {
+  background: var(--neuro-bg);
+  color: var(--neuro-text-secondary);
+  box-shadow: var(--neuro-shadow-raised);
+  border-radius: var(--neuro-radius-small);
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  font-size: 0.8rem;
+} */
+
+/* When not zoomed, make pages look like real PDF */
+.pdf-page-image-only[style*="scale(1)"] {
+  max-width: 800px;
+  width: 100%;
+}
+
+
+/* Fullscreen overlay modifications */
+.file-preview-overlay.fullscreen {
+  padding: 0;
+}
+
+.file-preview-modal.fullscreen-modal {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+   border-radius: 0;
+  display: flex;
+  flex-direction: column;
+}
+.fullscreen-modal .preview-content {
+  padding: 20px;
+  height: calc(100vh - 80px); /* Account for header height */
+}
+
+.fullscreen-modal .pdf-pages {
+  padding: 40px;
+  gap: 15px;
+}
+
+.fullscreen-modal .pdf-page-image-only {
+  min-width: 700px;
+  max-width: 900px;
+}
+
+/* Custom scrollbar for PDF */
+.pdf-pages::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.pdf-pages::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 7px;
+}
+
+.pdf-pages::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 7px;
+  border: 2px solid #f5f5f5;
+}
+
+.pdf-pages::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.zoom-indicator {
+  font-size: 12px;
+  color: #5f6368;
+  background: #e8eaed;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Keyboard hints for fullscreen mode */
+.keyboard-hints {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 10;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.keyboard-hints:hover {
+  opacity: 1;
+}
+
+.keyboard-hints kbd {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 11px;
+  margin: 0 2px;
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .keyboard-hints {
+  background: var(--neuro-bg);
+  color: var(--neuro-text-secondary);
+  box-shadow: var(--neuro-shadow-raised);
+  border-radius: var(--neuro-radius);
+}
+
+.neuro-theme .keyboard-hints kbd {
+  background: var(--neuro-bg);
+  color: var(--neuro-text);
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: var(--neuro-shadow-inset);
+  font-weight: bold;
+}
+
+/* Loading state improvements */
+.preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #5f6368;
+}
+
+.preview-loading p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* Error state improvements */
+.preview-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #d93025;
+  text-align: center;
+}
+
+.preview-error p {
+  margin: 16px 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.preview-error small {
+  color: #5f6368;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  padding: 8px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background: white;
+  color: #1a73e8;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #f8f9fa;
+  border-color: #1a73e8;
+}
+/* Document Preview - Match Original Formatting */
+
+.document-text-content {
+  font-family: 'Times New Roman', 'Liberation Serif', serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #000000;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+}
+
+/* Academic document container */
+.document-text.zoomable-text {
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  padding: 60px 80px; /* More generous padding like a real document */
+  max-width: 900px;
+  width: 100%;
+  min-height: 700px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform-origin: center top;
+  cursor: default;
+  transition: transform 0.3s ease;
+  margin: 0 auto;
+}
+
+/* Neumorphism Theme Override */
+.neuro-theme .document-preview {
+  background: var(--neuro-bg);
+  border: none;
+  border-radius: var(--neuro-radius);
+  box-shadow: var(--neuro-shadow-inset);
+  padding: 25px;
+  color: var(--neuro-text);
+  display: block;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+.neuro-theme .document-text.zoomable-text {
+  background: var(--neuro-bg);
+  border: none;
+  box-shadow: var(--neuro-shadow-inset);
+  border-radius: var(--neuro-radius-small);
+  color: var(--neuro-text);
+}
+
+.neuro-theme .document-text-content {
+  color: var(--neuro-text);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* Enhanced document wrapper */
+.document-content-wrapper {
+  flex: 1;
+  overflow: auto;
+  background: #f5f5f5;
+  padding: 40px 20px;
+}
+
+.neuro-theme .document-content-wrapper {
+  background: transparent;
+  padding: 0;
+}
+
+.document-content {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.neuro-theme .document-content {
+  background: transparent;
+}
+
+/* Academic document type indicator */
+.document-header[data-doc-type="academic"] {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #007bff;
+}
+
+.document-header[data-doc-type="academic"] h4::before {
+  content: "📚 ";
+}
+
+.neuro-theme .document-header {
+  border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+}
+
+
+.neuro-theme .document-header h4 {
+  color: var(--neuro-text);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.document-zoom-info {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.neuro-theme .document-zoom-info {
+  background: var(--neuro-bg);
+  color: var(--neuro-text-secondary);
+  box-shadow: var(--neuro-shadow-raised);
+  border-radius: var(--neuro-radius-small);
+}
+
+.document-footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.neuro-theme .document-footer {
+  border-top: 1px solid rgba(163, 177, 198, 0.2);
+  color: var(--neuro-text-secondary);
+}
+
+
+/* Better statistics for academic papers */
+.stat-item.academic {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+}
+
+.stat-item.academic strong {
+  color: #0d47a1;
+}
+
+/* Format hints for academic content */
+.format-hint {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #fff3e0;
+  border: 1px solid #ffcc02;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #ef6c00;
+}
+
+.format-hint::before {
+  content: "💡 ";
+  margin-right: 6px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .document-text.zoomable-text {
+    padding: 30px 20px;
+    max-width: 100%;
+    margin: 0 10px;
+  }
+  
+  .document-text-content {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  
+  .document-content-wrapper {
+    padding: 20px 10px;
+  }
+}
+
+/* Print styles to match original document */
+@media print {
+  .document-text.zoomable-text {
+    box-shadow: none;
+    border: none;
+    background: white;
+    padding: 1in;
+    max-width: 8.5in;
+    font-size: 12pt;
+  }
+  
+  .document-text-content {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: black;
+  }
+  
+  .document-header,
+  .document-footer,
+  .document-zoom-info {
+    display: none;
+  }
+}
+
+/* Enhanced hover effects */
+.document-text.zoomable-text:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* Better scrollbar for document content */
+.document-content-wrapper::-webkit-scrollbar {
+  width: 12px;
+}
+
+.document-content-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.document-content-wrapper::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 6px;
+  border: 2px solid #f1f1f1;
+}
+
+.document-content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Responsive design for zoom controls */
+@media (max-width: 768px) {
+
+  .file-preview-modal {
+    width: 95vw;
+    height: 85vh;
+    margin: 20px;
+  }
+  .neuro-theme .file-preview-modal {
+    border-radius: var(--neuro-radius);
+    box-shadow: 
+      15px 15px 30px var(--neuro-shadow-dark),
+      -15px -15px 30px var(--neuro-shadow-light);
+  }
+
+  .preview-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+   .neuro-theme .preview-header {
+    padding: 20px;
+  }
+
+  
+  .preview-title {
+    order: 1;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .preview-actions {
+    order: 2;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+   .neuro-theme .preview-actions {
+    gap: 8px;
+  }
+  
+  .preview-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .neuro-theme .preview-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  
+  .preview-title h3 {
+    font-size: 14px;
+  }
+
+   .neuro-theme .preview-title h3 {
+    font-size: 1rem;
+  }
+  
+  .zoom-indicator {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .neuro-theme .zoom-indicator {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+
+  .preview-content {
+    padding: 16px;
+  }
+
+   .neuro-theme .preview-content {
+    padding: 20px;
+  }
+  
+  .pdf-page {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .pdf-page-image {
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .preview-actions {
+    gap: 4px;
+  }
+  
+  .preview-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+  
+  .preview-content {
+    padding: 12px;
+  }
+  
+  .zoom-indicator {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+}
+/* High contrast mode support */
+@media (prefers-reduced-motion: reduce) {
+  .preview-btn,
+  .preview-image,
+  .pdf-pages {
+    transition: none;
+  }
+  
+  .pdf-pages {
+    scroll-behavior: auto;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  .video-info {
+    border: 2px solid #000;
+    background: #fff;
+  }
+
+  .action-btn {
+    border: 2px solid currentColor;
+  }
+
+  .video-overlay {
+    border: 3px solid #fff;
+  }
+}
+
+/* ===== NEUMORPHISM ANIMATIONS ===== */
+.neuro-theme .file-preview-modal {
+  animation: neumorphSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes neumorphSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+/* Custom scrollbar for better UX */
+.preview-content::-webkit-scrollbar,
+.pdf-pages::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.preview-content::-webkit-scrollbar-track,
+.pdf-pages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.preview-content::-webkit-scrollbar-thumb,
+.pdf-pages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.preview-content::-webkit-scrollbar-thumb:hover,
+.pdf-pages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

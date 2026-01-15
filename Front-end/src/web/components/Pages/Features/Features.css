@@ -1,0 +1,191 @@
+/* FeaturesPage.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* General Container */
+.stormdrive-features-page-container {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  color: white;
+}
+/* Hero Section */
+.storm-hero {
+  background:var(--bg-secondary);
+  padding: 8rem 2rem 4rem;
+  text-align: center;
+  color: white;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .storm-hero {
+  background: black;
+}
+
+.feature-illustration{
+    width:100%
+}
+
+.storm-hero-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.storm-hero-text h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #00d4ff, #667eea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align:left;
+}
+
+.storm-hero-text p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  text-align:left;
+  color: var(--text-secondary);
+}
+
+.storm-hero-visual {
+  position: relative;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.storm-center-logo {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #00d4ff, #667eea);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.storm-float-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  font-size: 3.5rem;
+  animation: storm-float 3s ease-in-out infinite;
+}
+
+.storm-float-1 { 
+  top: 0; 
+  left: 50%; 
+  transform: translateX(-50%); 
+}
+
+.storm-float-2 { 
+  top: 20%; 
+  right: 10%; 
+}
+
+.storm-float-3 { 
+  bottom: 20%; 
+  right: 10%; 
+}
+
+.storm-float-4 { 
+  bottom: 0; 
+  left: 50%; 
+  transform: translateX(-50%); 
+}
+
+.storm-float-5 { 
+  bottom: 20%; 
+  left: 10%; 
+}
+
+.storm-float-6 { 
+  top: 20%; 
+  left: 10%; 
+}
+
+@keyframes storm-float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-10px); 
+  }
+}
+
+/* Feature Groups Section */
+.stormdrive-features-group {
+  padding: 60px 20px;
+  text-align: center;
+  background-color: #111827;
+}
+
+.stormdrive-features-group-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.stormdrive-features-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stormdrive-features-card {
+  background-color: #1f2937;
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.stormdrive-features-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.stormdrive-features-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.stormdrive-features-description {
+  font-size: 16px;
+  color: #d1d5db;
+}
+
+/* Cursor Glow Effect */
+.stormdrive-cursor-glow {
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.59) 30%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: overlay;
+  z-index: 9999;
+}
+

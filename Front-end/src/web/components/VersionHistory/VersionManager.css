@@ -1,0 +1,224 @@
+/* ===== Overlay ===== */
+.version-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45); /* semi-dark blur */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: saturate(140%) blur(2px);
+}
+
+/* ===== Main Modal ===== */
+.version-modal {
+  background: #fff;
+  color: #111827;
+  border-radius: 12px;
+  width: min(720px, 92vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  border: 1px solid #eef0f3;
+  animation: vm-fade-in 180ms ease-out;
+}
+
+@keyframes vm-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Header ===== */
+.version-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eceff3;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: #0f172a;
+}
+
+.version-header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
+  color: #334155;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.close-btn:hover { background: #f8fafc; border-color: #d9dee5; color: #111827; }
+.close-btn:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+
+/* ===== Danger Ghost Button ===== */
+.danger.ghost {
+  background: transparent;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.danger.ghost:hover { background: #fff1f2; border-color: #fda4af; }
+
+/* ===== States ===== */
+.loading, .empty {
+  padding: 36px 18px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* ===== Version List ===== */
+.version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.version-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background .15s ease;
+}
+.version-item:hover { background: #f9fafb; }
+.version-item:last-child { border-bottom: none; }
+
+/* Left side (meta) */
+.version-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.file-name {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  font-size: .95rem;
+}
+.file-name:hover { text-decoration: underline; }
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 11px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.sub {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* Right side (actions) */
+.version-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.version-actions button {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.version-actions button:hover { background: #eef2f7; border-color: #d9dee5; }
+
+/* ===== Small Modal (Clear Previous Versions) ===== */
+.small-modal {
+  position: fixed;
+  z-index: 1100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, 92vw);
+  background: #fff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.small-modal h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.small-modal label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.small-modal input[type="number"] {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.small-modal .actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.small-modal .actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #111827;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: all .18s ease;
+}
+.small-modal .actions button:hover { background: #eef2f7; }
+.small-modal .actions button:last-child {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fee2e2;
+}
+.small-modal .actions button:last-child:hover {
+  background: #fecaca;
+}

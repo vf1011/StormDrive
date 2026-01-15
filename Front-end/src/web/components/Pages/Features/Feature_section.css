@@ -1,0 +1,310 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Main Hero Content */
+.feature-hero-content {
+  display: flex;
+  align-items: center;
+  min-height: 90vh;
+  padding: 100px 40px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 60px;
+}
+
+.destination-info {
+  flex: 1;
+  max-width: 500px;
+}
+
+.location-tag {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.destination-title {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: white;
+  line-height: 0.9;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.destination-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 400px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+
+/* Cards Container */
+.cards-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  max-width: 800px;
+  perspective: 1000px;
+}
+
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+.destination-cards {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  height: 100%;
+  transform: rotateY(-5deg) rotateX(2deg);
+}
+
+.destination-card {
+  position: relative;
+  min-width: 280px;
+  height: 350px;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.4s ease;
+  flex-shrink: 0;
+}
+
+.destination-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.destination-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
+}
+
+.destination-card:hover .card-bg {
+  transform: scale(1.1);
+}
+
+.card-content {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2;
+  color: white;
+}
+
+.card-location {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Card Backgrounds */
+.card-saint .card-bg {
+  background: linear-gradient(135deg, rgba(46, 139, 87, 0.8), rgba(34, 139, 34, 0.8)),
+              url('https://images.unsplash.com/photo-1669060475985-e72f27a63241?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+}
+
+.card-nagano .card-bg {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.8), rgba(70, 130, 180, 0.8)),
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%2387ceeb"/><ellipse cx="200" cy="150" rx="80" ry="40" fill="white" opacity="0.8"/></svg>');
+}
+
+.card-marrakech .card-bg {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.8), rgba(205, 133, 63, 0.8)),
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23daa520"/><path d="M50,200 Q150,150 250,200 T350,200 L350,300 L50,300 Z" fill="%23cd853f" opacity="0.8"/></svg>');
+}
+
+.card-yosemite .card-bg {
+  background: linear-gradient(135deg, rgba(112, 128, 144, 0.8), rgba(47, 79, 79, 0.8)),
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23708090"/><polygon points="0,300 100,150 200,300" fill="%232f4f4f" opacity="0.8"/></svg>');
+}
+
+.card-lances .card-bg {
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.8), rgba(70, 130, 180, 0.8)),
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%231e90ff"/><path d="M0,200 Q100,150 200,200 T400,200 L400,300 L0,300 Z" fill="%234682b4" opacity="0.8"/></svg>');
+}
+
+/* Navigation Controls */
+.navigation-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 100;
+  margin-top: 8000px;
+}
+
+.nav-arrow {
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.progress-bar {
+  width: 200px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b35, #f7931e);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+.slide-counter {
+  color: white;
+  font-size: 2rem;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .hero-content {
+    gap: 40px;
+  }
+  
+  .destination-cards {
+    transform: rotateY(-3deg) rotateX(1deg);
+  }
+}
+
+@media (max-width: 968px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+    padding: 120px 20px 40px;
+  }
+  
+  .destination-title {
+    font-size: 3rem;
+  }
+  
+  .cards-container {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+  
+  .destination-cards {
+    transform: none;
+  }
+  
+  .destination-card {
+    min-width: 240px;
+    height: 300px;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    padding: 15px 20px;
+  }
+  
+  .destination-title {
+    font-size: 2.5rem;
+  }
+  
+  .destination-card {
+    min-width: 200px;
+    height: 280px;
+  }
+  
+  .slide-counter {
+    font-size: 1.5rem;
+  }
+  
+  .close-button {
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Focus states for accessibility */
+.nav-arrow:focus,
+.close-button:focus,
+.destination-card:focus,
+.discover-btn:focus {
+  outline: 2px solid #f7931e;
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

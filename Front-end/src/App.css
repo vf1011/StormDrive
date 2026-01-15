@@ -1,0 +1,211 @@
+:root {
+  /* Light Theme Base Colors */
+ /* Light Theme */
+--bg-primary-light: linear-gradient(180deg, #ffffff 0%, #538ABD 100%);
+--bg-secondary-light: #ffffff;
+--text-primary-light: #041B35;
+--text-secondary-light: #245581;
+--accent-light: rgb(25, 75, 122);
+--card-bg-light: #ffffff;
+--border-light: #B1C5DB;
+--file-bg-light:#f5f8fb; /* ✅ Soft light gray-blue background for file cards */
+
+/* Dark Theme */
+--bg-primary-dark: linear-gradient(180deg, #000000 0%, #565656 100%);
+--bg-secondary-dark: #2a2a2a;
+--text-primary-dark: #ffffff;
+--text-secondary-dark: #cccccc;
+--accent-dark: #00aaff;
+--border-dark: #404040;
+--card-bg-dark: #2a2a2a;
+--file-bg-dark: #1c1e22;
+
+  /* Theme Variables */
+  --primary-bg: var(--bg-primary-light);
+  --secondary-bg: var(--bg-secondary-light);
+  --accent-blue: var(--accent-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --card-bg: var(--card-bg-light);
+  --border-color: var(--border-light);
+  --hover-bg: rgba(5, 19, 97, 0.1);
+  --file-bg: var(--file-bg-light)
+}
+
+[data-theme='dark'] {
+  --primary-bg: var(--bg-primary-dark);
+  --secondary-bg: var(--bg-secondary-dark);
+  --accent-blue: var(--accent-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --card-bg: var(--card-bg-dark);
+  --border-color: var(--border-dark);
+  --hover-bg: rgba(0, 166, 255, 0.1);
+   --file-bg: var(--file-bg-dark)
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+/* Quantum Cursor Toggle Button Styles */
+.quantum-cursor-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--card-bg);
+  border: 2px solid var(--quantum-primary);
+  border-radius: 50px;
+  padding: 10px 15px;
+  color: var(--quantum-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10001;
+  box-shadow: 0 4px 15px var(--quantum-glow);
+}
+
+.quantum-cursor-toggle:hover {
+  background: var(--quantum-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--quantum-glow);
+}
+
+.quantum-cursor-toggle.active {
+  background: var(--quantum-primary);
+  color: white;
+  animation: quantumTogglePulse 2s ease-in-out infinite;
+}
+
+@keyframes quantumTogglePulse {
+  0%, 100% { box-shadow: 0 4px 15px var(--quantum-glow); }
+  50% { box-shadow: 0 8px 30px var(--quantum-glow); }
+}
+
+/* Security indicator for quantum protected areas */
+.security-indicator {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 25px;
+  padding: 8px 12px;
+  color: #00ff88;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 10001;
+  backdrop-filter: blur(10px);
+  animation: securityPulse 3s ease-in-out infinite;
+}
+
+@keyframes securityPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+[data-theme='dark'] .security-indicator {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Performance optimizations */
+.quantum-core,
+.quantum-ring,
+.quantum-particle,
+.quantum-burst,
+.quantum-field {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Disable quantum cursor on mobile for performance */
+@media (max-width: 768px) {
+  body.quantum-shield-active,
+  body.quantum-shield-active * {
+    cursor: default !important;
+  }
+  
+  .quantum-core,
+  .quantum-ring,
+  .quantum-particle,
+  .quantum-burst,
+  .quantum-field {
+    display: none;
+  }
+  
+  .quantum-cursor-toggle {
+    display: none;
+  }
+}

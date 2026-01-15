@@ -1,0 +1,355 @@
+/* ContactUs.css */
+
+/* Container Styles */
+.contact-container {
+  min-height: 100vh;
+  background-color: transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Arial', sans-serif;
+}
+
+.contact-card {
+    width: 100%;
+    max-width: 970px;
+    min-height: 600px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    overflow: hidden;
+    margin: 2rem auto;
+    transition: all 0.3s ease;
+}
+
+/* Left Section - Content */
+.content-section {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: var(--card-bg);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+.main-title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: var(--accent);
+  line-height: 1.1;
+  margin-bottom: 2rem;
+  margin: 0 0 2rem 0;
+}
+
+.title-highlight {
+  color: var(--accent);
+}
+
+.description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  max-width: 400px;
+}
+
+/* Contact Information */
+.contact-info {
+  margin-bottom: 2rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.contact-icon {
+  width: 45px;
+  height: 45px;
+  background-color:transparent;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.contact-icon span {
+  color: white;
+  font-size: 32px;
+}
+.contact-icon .mail{
+  color: var(--accent);
+  font-size: 40px;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.contact-value {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Right Section - Form */
+.contact-page .form-section {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--card-bg);
+}
+
+.contact-page .contact-form {
+  width: 100%;
+}
+
+.contact-page .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.contact-page .form-group:last-of-type {
+  margin-bottom: 2rem;
+}
+
+.contact-page .form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Form Input Styles */
+.contact-page .form-input,
+.contact-page .form-select,
+.contact-page .form-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.contact-page .form-input:focus,
+.contact-page .form-select:focus,
+.contact-page .form-textarea:focus {
+  border-color: #4285f4;
+  background-color: white;
+}
+
+.contact-page .form-select {
+  cursor: pointer;
+}
+
+.contact-page .form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Submit Button */
+.contact-submit-button {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+    padding: 32px 8px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    height: 40px;
+    width: 205px;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+    position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.button-text {
+  display: inline-block;
+  margin-right: 10px;
+  font-weight: bold;
+  color: var(--text-primary);
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.text-out {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.button-icon {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 29px;
+    padding: 6px;
+    color:white;
+    transition: transform 0.5s ease;
+}
+
+.arrow-slide {
+  transform: translateX(140px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact-card {
+    flex-direction: column;
+    margin: 1rem;
+  }
+  
+  .content-section,
+  .form-section {
+    padding: 2rem;
+  }
+  
+  .main-title {
+    font-size: 2.5rem;
+  }
+  
+  .contact-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-section,
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .main-title {
+    font-size: 2rem;
+  }
+  
+  .contact-card {
+    border-radius: 15px;
+  }
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+
+.dialog-backdrop {
+ position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(4, 27, 53, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-dialog {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 30px 40px;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+  width: 420px;
+  animation: fadeIn 0.5s ease;
+}
+
+.checkmark-box {
+  width: 80px;
+  height: 80px;
+  background-color: #7ae582;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tick {
+  font-size: 40px;
+  color: white;
+}
+
+.thank-you {
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.order-message {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color:var(--text-secondary);
+}
+
+.order-subtext {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.close-dialog {
+  background-color: var(--accent);
+  color: white;
+  padding: 11px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.close-dialog:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+

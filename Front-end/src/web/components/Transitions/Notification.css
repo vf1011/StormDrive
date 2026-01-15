@@ -1,0 +1,194 @@
+/* === Notification Container: Top-Right Fixed === */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+  contain: layout paint;
+  isolation: isolate;
+}
+
+/* Allow each notification to receive clicks */
+.notification-container .notification {
+  pointer-events: auto;
+}
+
+/* === Base Notification === */
+.notification {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  min-width: 300px;
+  max-width: 400px;
+  margin: 0;
+  opacity: 1;
+
+  will-change: opacity, transform;
+  contain: layout paint;
+  isolation: isolate;
+}
+
+/* Left Accent Bar */
+.notification::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+}
+
+/* === Variants === */
+.notification-success {
+  background: rgba(236, 253, 245, 0.98);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.notification-success::before { background: #10B981; }
+
+.notification-info {
+  background: rgba(239, 246, 255, 0.98);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.notification-info::before { background: #3B82F6; }
+
+.notification-warning {
+  background: rgba(255, 251, 235, 0.98);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.notification-warning::before { background: #F59E0B; }
+
+.notification-error {
+  background: rgba(254, 242, 242, 0.98);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.notification-error::before { background: #EF4444; }
+
+/* === Content === */
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.notification-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notification-success .notification-icon-wrapper { background: rgba(16, 185, 129, 0.1); }
+.notification-info .notification-icon-wrapper    { background: rgba(59, 130, 246, 0.1); }
+.notification-warning .notification-icon-wrapper { background: rgba(245, 158, 11, 0.1); }
+.notification-error .notification-icon-wrapper   { background: rgba(239, 68, 68, 0.1); }
+
+.notification-success .notification-icon { color: #10B981; }
+.notification-info .notification-icon    { color: #3B82F6; }
+.notification-warning .notification-icon { color: #F59E0B; }
+.notification-error .notification-icon   { color: #EF4444; }
+
+.notification-text {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #111827;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.notification-message {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.notification-action {
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+}
+.notification-action:hover { color: #1D4ED8; }
+
+/* Close Button */
+.notification-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notification-close:hover {
+  color: #6B7280;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* === Animations === */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+
+.notification-enter {
+  animation: slideIn 0.3s ease-out;
+}
+.notification-exit {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+/* === Responsive Support === */
+@media (max-width: 768px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    align-items: stretch;
+  }
+
+  .notification {
+    min-width: auto;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,309 @@
+/* src/components/QuantumCursor/QuantumShieldCursor.css */
+
+/* QUANTUM SHIELD MATRIX CURSOR STYLES - STORMDRIVE THEME */
+.quantum-shield-active {
+  cursor: none !important;
+}
+
+.quantum-shield-active * {
+  cursor: none !important;
+}
+
+.quantum-core {
+  position: fixed;
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(circle, var(--accent-blue), var(--text-secondary));
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 20px var(--accent-blue);
+  animation: quantumPulse 2s ease-in-out infinite;
+  z-index: 10000;
+  transition: all 0.1s ease;
+}
+
+@keyframes quantumPulse {
+  0%, 100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 20px var(--accent-blue); 
+  }
+  50% { 
+    transform: scale(1.2); 
+    box-shadow: 0 0 30px var(--accent-blue); 
+  }
+}
+
+.quantum-ring {
+  position: fixed;
+  border: 2px solid var(--accent-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: all 0.1s ease;
+  opacity: 0.8;
+}
+
+.quantum-ring-1 {
+  width: 50px;
+  height: 50px;
+  animation: quantumRotate 3s linear infinite;
+  border-color: var(--accent-blue);
+}
+
+.quantum-ring-2 {
+  width: 70px;
+  height: 70px;
+  animation: quantumRotate 3s linear infinite reverse;
+  animation-delay: -1s;
+  border-color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.quantum-ring-3 {
+  width: 90px;
+  height: 90px;
+  animation: quantumRotate 4s linear infinite;
+  animation-delay: -2s;
+  border-color: var(--border-color);
+  opacity: 0.4;
+}
+
+@keyframes quantumRotate {
+  0% { 
+    transform: rotate(0deg) scale(1); 
+    opacity: 0.8; 
+  }
+  50% { 
+    transform: rotate(180deg) scale(1.1); 
+    opacity: 0.4; 
+  }
+  100% { 
+    transform: rotate(360deg) scale(1); 
+    opacity: 0.8; 
+  }
+}
+
+.quantum-particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: quantumFloat 2.5s ease-out forwards;
+  box-shadow: 0 0 8px var(--accent-blue);
+  z-index: 9998;
+}
+
+@keyframes quantumFloat {
+  0% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(0.3) translate(var(--qx), var(--qy)); 
+  }
+}
+
+.quantum-burst {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: quantumBurst 1.5s ease-out forwards;
+  box-shadow: 0 0 12px var(--accent-blue);
+  z-index: 9997;
+}
+
+@keyframes quantumBurst {
+  0% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(0.2) translate(var(--bx), var(--by)); 
+  }
+}
+
+.quantum-field {
+  position: fixed;
+  width: 150px;
+  height: 150px;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: quantumField 8s ease-in-out infinite;
+  z-index: 9996;
+  opacity: 0.3;
+}
+
+@keyframes quantumField {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 0.1; 
+  }
+  50% { 
+    transform: scale(1.3) rotate(180deg); 
+    opacity: 0.3; 
+  }
+}
+
+/* Enhanced hover effects */
+.quantum-shield-active:hover .quantum-core {
+  animation-duration: 1s;
+  box-shadow: 0 0 35px var(--accent-blue);
+}
+
+.quantum-shield-active:hover .quantum-ring {
+  border-width: 3px;
+  animation-duration: 2s;
+}
+
+/* Light Theme - Uses your existing light theme colors */
+[data-theme='light'] .quantum-core {
+  background: radial-gradient(circle, rgb(25, 75, 122), #245581);
+  box-shadow: 0 0 20px rgba(25, 75, 122, 0.8);
+}
+
+[data-theme='light'] .quantum-ring-1 {
+  border-color: rgba(25, 75, 122, 0.8);
+}
+
+[data-theme='light'] .quantum-ring-2 {
+  border-color: rgba(36, 85, 129, 0.6);
+}
+
+[data-theme='light'] .quantum-ring-3 {
+  border-color: rgba(177, 197, 219, 0.5);
+}
+
+[data-theme='light'] .quantum-particle {
+  background: rgb(25, 75, 122);
+  box-shadow: 0 0 8px rgba(25, 75, 122, 0.8);
+}
+
+[data-theme='light'] .quantum-burst {
+  background: rgb(25, 75, 122);
+  box-shadow: 0 0 12px rgba(25, 75, 122, 0.8);
+}
+
+[data-theme='light'] .quantum-field {
+  border-color: rgba(177, 197, 219, 0.3);
+}
+
+/* Dark Theme - Uses your existing dark theme colors */
+[data-theme='dark'] .quantum-core {
+  background: radial-gradient(circle, #00aaff, #0088cc);
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.8);
+}
+
+[data-theme='dark'] .quantum-ring-1 {
+  border-color: rgba(0, 170, 255, 0.8);
+}
+
+[data-theme='dark'] .quantum-ring-2 {
+  border-color: rgba(204, 204, 204, 0.6);
+}
+
+[data-theme='dark'] .quantum-ring-3 {
+  border-color: rgba(64, 64, 64, 0.5);
+}
+
+[data-theme='dark'] .quantum-particle {
+  background: #00aaff;
+  box-shadow: 0 0 8px rgba(0, 170, 255, 0.8);
+}
+
+[data-theme='dark'] .quantum-burst {
+  background: #00aaff;
+  box-shadow: 0 0 12px rgba(0, 170, 255, 0.8);
+}
+
+[data-theme='dark'] .quantum-field {
+  border-color: rgba(64, 64, 64, 0.3);
+}
+
+/* Storm security branding effects */
+.quantum-core::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.8;
+}
+
+/* Enhanced storm effects on click */
+.quantum-storm-effect {
+  animation: stormPulse 0.3s ease-out;
+}
+
+@keyframes stormPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+/* Performance optimizations */
+.quantum-core,
+.quantum-ring,
+.quantum-particle,
+.quantum-burst,
+.quantum-field {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Accessibility - Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .quantum-core,
+  .quantum-ring,
+  .quantum-particle,
+  .quantum-burst,
+  .quantum-field {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile optimizations - Disable on smaller screens for performance */
+@media (max-width: 768px) {
+  .quantum-shield-active,
+  .quantum-shield-active * {
+    cursor: default !important;
+  }
+  
+  .quantum-core,
+  .quantum-ring,
+  .quantum-particle,
+  .quantum-burst,
+  .quantum-field {
+    display: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .quantum-core {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .quantum-ring {
+    border-width: 3px;
+  }
+  
+  .quantum-particle,
+  .quantum-burst {
+    border: 1px solid var(--text-primary);
+  }
+}

@@ -1,0 +1,53 @@
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-bell {
+  background: none;
+  border: 2px solid #aac3dd;
+  border-radius: 50%;
+  padding: 10px;
+  color: #245581;
+  cursor: pointer;
+}
+
+.notification-panel {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 300px;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  z-index: 999;
+}
+
+.notification-header {
+  padding: 12px;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-item .copy-btn {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
