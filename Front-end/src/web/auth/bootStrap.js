@@ -2,12 +2,15 @@
 import { createAuthManager } from "../../core/auth/authManager.js";
 import { createVaultManager } from "../../core/auth/vaultManager.js";
 import { createSessionManager } from "../../core/auth/sessionManager.js";
+
 import { supabaseAuthProvider } from "./supabaseAuthProvider.js";
 import { createBackendAuthApi } from "./backendAuthApi.js";
-import { keyBundleApi } from "./keybundleAPI.js";
-import { folderApi } from "../api/folderApi.js";
-import { keyring } from "./keyringSingleton.js"; 
-import { cryptoBootstrap } from "./cryptoBootstrap.js";
+
+import { keybundleInit, getKeybundle } from "../api/keybundleAPI.js";
+import { initFolderApi } from "../api/folderApi.js";
+
+import { keyring } from "./keyringSingleton.js";
+import { cryptoBootstrap } from "./cryptoBootstrap.js"; // ✅ ensure file name matches
 
 export function createAppAuth() {
   const getAccessToken = async () => {
@@ -17,15 +20,29 @@ export function createAppAuth() {
 
   const backendAuth = createBackendAuthApi({ getAccessToken });
 
-  const auth = createAuthManager({ authAdapter: supabaseAuthProvider, backendAuth });
+  const auth = createAuthManager({
+    authAdapter: supabaseAuthProvider,
+    backendAuth,
+  });
+
   const vault = createVaultManager({ keyring });
+
+  const folderApi = {
+    initFolder: (token, payload) => initFolderApi({ token, payload }),
+  };
+
+  // ✅ the object shape SessionManager expects
+  const keyBundleApi = {
+    getBundle: (token) => getKeybundle(token),
+    init: (token, payload) => keybundleInit(token, payload),
+  };
 
   const session = createSessionManager({
     auth,
     vault,
-    keyBundleApi,
+    keyBundleApi, // ✅ not keybundleInit
     folderApi,
-    cryptoBootstrap,
+    cryptoBootstrap, // ✅ spelling consistent everywhere
   });
 
   return { auth, vault, session };

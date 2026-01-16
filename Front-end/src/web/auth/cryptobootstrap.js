@@ -7,17 +7,14 @@
 //
 // This uses ONLY client-side crypto; backend stores only wrapped blobs.
 
-import { bytesToB64, b64ToBytes } from "../../../packages/core/src/utils/base64.js";
-import { wrapBytesV1 } from "../../../packages/core/src/crypto/envelope.js";
-import { deriveCs, deriveKekUnlock, deriveKekRecovery } from "../../../packages/core/src/kdf/unlock.js";
-import { aadForMak, aadForMakRecovery, aadForFolder } from "../../../packages/core/src/keyring/aad.js";
-import { wipeBytes } from "../../../packages/core/src/crypto/provider.js";
+import { bytesToB64, b64ToBytes } from "../../core/crypto/base64.js";
+import { wrapBytesV1 } from "../../core/crypto/envelope.js";
+import { deriveCs, deriveKekUnlock, deriveKekRecovery } from "../../core/crypto/unlock.js";
+import { aadForMak, aadForMakRecovery, aadForFolder } from "../../core/crypto/aad.js";
+import { wipeBytes } from "../../core/crypto/provider.js";
 
 import { cryptoProvider, keyring } from "./keyringSingleton.js";
 
-// You can set your actual root folder identifier here.
-// If your backend uses integer IDs, you can still send null parent_id and let backend create it.
-// If backend needs a known root id, set it and pass it in payload.
 export const ROOT_FOLDER_ID = "root";
 
 /**
@@ -29,9 +26,7 @@ export function generateRecoveryKeyBytes() {
 }
 
 /**
- * Build payloads required right after signup:
- * - keybundleInitPayload for POST /keybundle/init
- * - rootFolderInitPayload for POST /folder/init-folder
+
  *
  * @param {{ userId:string, password:string, recoveryKeyBytes:Uint8Array }} args
  * @returns {Promise<{ keybundleInitPayload: any, rootFolderInitPayload: any, recoveryKey_b64?: string }>}

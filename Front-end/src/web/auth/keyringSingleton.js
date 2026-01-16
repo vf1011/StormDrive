@@ -1,8 +1,8 @@
 // src/web/auth/keyringSingleton.js
 
 
-import { WebCryptoProvider } from "../crypto-bridge/WebCryptoProvider.js";
-import { Keyring } from "../../../packages/core/src/keyring/Keyring.js";
+import { WebCryptoProvider } from "../crypto/webCryptoProvider.js";
+import { Keyring } from "../../core/crypto/keyrings.js";
 
 // Create once per tab/session (in-memory only)
 const cp = new WebCryptoProvider();

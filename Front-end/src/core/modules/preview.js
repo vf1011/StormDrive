@@ -1,4 +1,4 @@
-import {API_BASE_URL} from "../api/config";
+import {API_BASE_URL} from "../../web/api/config";
 
 export function buildPreviewMetadataUrl({ fileId, versionId, apiBaseUrl }) {
   if (!fileId) {
