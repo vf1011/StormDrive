@@ -1,7 +1,7 @@
 // src/fileOps/delete/deleteLogic.js
 
-import { deleteFilesApi } from "../api/filesapi";
-import { deleteFoldersApi } from "../api/folderapi";
+import { deleteFilesApi } from "../../web/api/filesapi";
+import { deleteFoldersApi } from "../../web/api/folderapi";
 
 export function getItemId(item) {
   if (!item) return null;

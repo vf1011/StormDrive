@@ -2,26 +2,23 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { bytesToB64 } from "../../../core/crypto/base64";
-import { cryptoBootstrap } from "../../auth/cryptobootstrap";
+import { cryptoBootstrap } from "../../auth/cryptoBootstrap.js";
 
 import Notification from "../Transitions/Notification";
 import Modal from "./Modal";
 import "./styles/Register.css";
 
 // ✅ Manager-based auth (same approach as LoginPage)
-import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient"; // adjust path if needed
+import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient";
 
 const Register = ({ darkMode = false }) => {
   const navigate = useNavigate();
 
-  // ---- form state (matches your UI snippet) ----
+  // ---- form state ----
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [recoveryKeyB64, setRecoveryKeyB64] = useState("");
-  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
-
 
   // ---- ui state ----
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +36,7 @@ const Register = ({ darkMode = false }) => {
   const errorMessage = (err) =>
     err?.response?.data?.detail ?? err?.message ?? String(err);
 
-  // ✅ start managers once
+  // start managers once
   useEffect(() => {
     ensureAuthStarted().catch(() => {});
   }, []);
@@ -52,8 +49,32 @@ const Register = ({ darkMode = false }) => {
       throw new Error("Password must contain at least one special character");
   };
 
+  function downloadRecoveryKeyFile(userEmail, rkB64) {
+    const content =
+`StormDrive Recovery Key
+
+Email: ${userEmail}
+RecoveryKey(Base64): ${rkB64}
+
+Keep this safe. If you lose it and forget your password, your files cannot be recovered.
+`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `stormdrive-recovery-key-${String(userEmail || "account").replace(/[^a-z0-9]/gi, "_")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return; // ✅ prevent double submit
     setIsLoading(true);
 
     try {
@@ -69,49 +90,68 @@ const Register = ({ darkMode = false }) => {
       validatePasswordPolicy(password);
 
       await ensureAuthStarted();
-      const { auth, session: sessionMgr } = getAppAuth();
+      const { auth } = getAppAuth();
 
-      const res = await auth.register({
+      // 1) Signup: backend creates user (your backend currently returns only a message)
+      await auth.register({
         name: cleanName,
         email: cleanEmail,
         password,
         confirmPassword,
       });
 
-      // No session => email confirmation required
-      if (!res?.session?.accessToken) {
+      // 2) Login: required to obtain session/tokens so crypto bootstrap can call protected endpoints
+      let loginRes;
+      try {
+        loginRes = await auth.login({ email: cleanEmail, password });
+      } catch (err) {
+        // If email verification is enabled later, login can fail until verified
         setShowModal(true);
         setNotification({
           open: true,
-          message: "Check your email to confirm your account.",
+          message: "Account created. Please verify your email (if required) and login.",
           severity: "info",
         });
         return;
       }
 
-      // ✅ unlock vault after successful signup (zero-knowledge)
-      // 1) Generate recovery key (must be shown to user)
+      // Optional: if your login flow indicates 2FA is required
+      const require2fa =
+        loginRes?.require_2fa ??
+        loginRes?.require2fa ??
+        loginRes?.data?.require_2fa ??
+        false;
+
+      if (require2fa) {
+        setNotification({
+          open: true,
+          message: "2FA is enabled. Please login and complete 2FA to finish setup.",
+          severity: "info",
+        });
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // 3) Crypto bootstrap + unlock (creates keybundle if missing)
+      const { session: sessionMgr } = getAppAuth();
+
+      // Generate Recovery Key (client-side). Your backend should store wrapped_mak_rk (not the RK itself).
       const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
       const rkB64 = bytesToB64(rkBytes);
-      setRecoveryKeyB64(rkB64);
 
-      // 2) Initialize keybundle + root folder key on backend
       await sessionMgr.completeSignupCrypto({ password, recoveryKeyBytes: rkBytes });
-
-      // 3) Now unlock vault
       await sessionMgr.unlockVaultWithPassword(password);
 
-      // 4) Force user to save recovery key before entering dashboard
-      setShowRecoveryModal(true);
-      return; // do NOT navigate yet
-
+      // 4) Save RK without blocking UI (auto-download file)
+      downloadRecoveryKeyFile(cleanEmail, rkB64);
 
       setNotification({
         open: true,
-        message: "Registered successfully. Redirecting...",
+        message: "Account created. Recovery key downloaded. Redirecting...",
         severity: "success",
       });
 
+      // 5) Go to dashboard
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setNotification({
@@ -124,7 +164,6 @@ const Register = ({ darkMode = false }) => {
     }
   };
 
-  // Keep your UI handler name (even if not fully wired yet)
   const handleGoogleLogin = async () => {
     setNotification({
       open: true,
@@ -260,7 +299,12 @@ const Register = ({ darkMode = false }) => {
                   <img src="/images/apple-logo.svg" alt="Apple" />
                 </button>
 
-                <button type="button" className="social-btn" onClick={handleGoogleLogin} disabled={isLoading}>
+                <button
+                  type="button"
+                  className="social-btn"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                >
                   <img
                     src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
                     alt="Google"
@@ -285,29 +329,6 @@ const Register = ({ darkMode = false }) => {
           }}
         />
       )}
-
-      {showRecoveryModal && (
-  <div className="modal-backdrop">
-    <div className="modal-card">
-      <h3>Save your Recovery Key</h3>
-      <p>
-        This is required for account recovery. If you lose it and forget your password,
-        your files cannot be decrypted.
-      </p>
-      <textarea readOnly value={recoveryKeyB64} style={{ width: "100%", height: 90 }} />
-      <button
-        className="register-btn"
-        onClick={() => {
-          setShowRecoveryModal(false);
-          navigate("/dashboard", { replace: true });
-        }}
-      >
-        I have saved it
-      </button>
-    </div>
-  </div>
-)}
-
 
       <Notification
         open={notification.open}

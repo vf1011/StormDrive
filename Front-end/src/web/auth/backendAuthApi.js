@@ -168,5 +168,3 @@ export function createBackendAuthApi({ getAccessToken }) {
     },
   };
 }
-
-export default backendAuthApi;

@@ -1,4 +1,4 @@
-import { folderStatus } from "../api/folderApi.js";
+import { folderStatus } from "../api/folderapi.js";
 import { getKeyring, getCryptoProvider } from "../state/sessionKeyring.js";
 
 export async function resolveFolderFoK(token, folderId) {

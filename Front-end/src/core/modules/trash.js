@@ -4,12 +4,12 @@ import {
   fetchTrashFilesApi,
   restoreFilesApi,
   permDeleteFilesApi,
-} from "../../web/api/filesApi"; // ✅ adjust path
+} from "../../web/api/filesapi"; // ✅ adjust path
 import {
   fetchTrashFoldersApi,
   restoreFoldersApi,
   permDeleteFoldersApi,
-} from "../../web/api/folderApi"; // ✅ adjust path
+} from "../../web/api/folderapi"; // ✅ adjust path
 
 export function getItemId(item) {
   if (!item) return null;

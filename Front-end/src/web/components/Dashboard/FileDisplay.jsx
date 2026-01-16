@@ -20,7 +20,7 @@ import Upload from './Upload.jsx';
 import Trash from './Trash.jsx';
 import FilePreview from './FilePreview.jsx';
 import { formatSize, formatDate, guessType, formatToUserLocalTime } from '../../../utils.js';
-import { API_BASE_URL } from '../../../core/api/config';
+import { API_BASE_URL } from '../../api/config.js';
 import FileTransferPanel from './FilePanel.jsx';
 import { categorizeFile } from '../../../utils.js';
 
