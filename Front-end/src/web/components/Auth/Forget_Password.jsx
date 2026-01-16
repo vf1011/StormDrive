@@ -1,7 +1,7 @@
 // src/components/Forgot_Password.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "../../../supabase";
+import { supabaseAuthProvider } from "../../auth/supabaseAuthProvider";
 import "./styles/Forgot_password.css";
 
 const Forgot_Password = () => {
@@ -26,9 +26,8 @@ const Forgot_Password = () => {
       // 2) This URL must be allowed in Supabase Auth -> URL Configuration (Redirect URLs).
       const redirectTo = `${window.location.origin}/reset-password`;
 
-      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-        redirectTo,
-      });
+      const { error } = await supabaseAuthProvider.requestPasswordReset(email, redirectTo);
+    
 
       if (error) {
         setMessage("An error occurred: " + error.message);

@@ -1,5 +1,5 @@
 // src/web/auth/appAuthClient.js
-import { createAppAuth } from "./bootStrap"; // adjust name/case to your file
+import { createAppAuth } from "./bootStrap";
 
 const appAuth = createAppAuth();
 let started = false;

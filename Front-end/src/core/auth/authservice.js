@@ -82,7 +82,7 @@ async loginWithPassword({ email, password }) {
     mfaRequired: require2fa,
     methods: require2fa ? ["totp", "email_backup"] : [],
   };
-}
+},
 
 
     // ---------- TOTP VERIFY ----------

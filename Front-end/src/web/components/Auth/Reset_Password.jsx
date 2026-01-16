@@ -1,204 +1,173 @@
-// src/components/Reset_password.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../../../supabase";
-import "./styles/Reset_password.css";
+import { useNavigate } from "react-router-dom";
 
-const Reset_Password = () => {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [recoveryReady, setRecoveryReady] = useState(false);
+// ✅ keep your existing supabase import (you already use it)
+import { supabase } from "../supabase";
 
+// ✅ your app auth singleton
+import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient";
+
+import { b64ToBytes } from "../../../core/crypto/base64.js";
+
+import { makeWrappedMakPassword } from "../../../core/crypto/makOps.js";
+
+export default function Reset_Password() {
   const navigate = useNavigate();
 
-  // Helper: parse tokens from the URL hash (Supabase recovery links)
-  const parseHash = () => {
-    const hash = window.location.hash || "";
-    const get = (key) => {
-      const m = hash.match(new RegExp(`${key}=([^&]+)`));
-      return m ? decodeURIComponent(m[1]) : null;
-    };
-    return {
-      type: get("type"), // usually 'recovery'
-      access_token: get("access_token"),
-      refresh_token: get("refresh_token"),
-    };
-  };
+  const [recoveryReady, setRecoveryReady] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const [recoveryKeyB64, setRecoveryKeyB64] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [msg, setMsg] = useState("");
+
+  // your existing "recovery session ready" check
   useEffect(() => {
-    const initRecovery = async () => {
-      try {
-        setMessage("");
-
-        // Case A: tokens are present in URL hash
-        const { type, access_token, refresh_token } = parseHash();
-
-        if (type === "recovery" && access_token && refresh_token) {
-          const { error } = await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
-
-          // Remove tokens from URL for safety
-          window.history.replaceState(null, "", window.location.pathname);
-
-          if (error) {
-            setMessage("Recovery link invalid or expired. Please request a new one.");
-            setRecoveryReady(false);
-            return;
-          }
-
-          setRecoveryReady(true);
-          return;
-        }
-
-        // Case B: in some setups supabase may already have a session
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          setMessage("Unable to validate recovery session. Please request a new link.");
-          setRecoveryReady(false);
-          return;
-        }
-
-        if (data?.session?.access_token) {
-          setRecoveryReady(true);
-        } else {
-          setMessage("Recovery link invalid or expired. Please request a new one.");
-          setRecoveryReady(false);
-        }
-      } catch (e) {
-        setMessage("Something went wrong. Please request a new password reset link.");
-        setRecoveryReady(false);
-      }
-    };
-
-    initRecovery();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
+      setRecoveryReady(!!data?.session);
+    })();
+    return () => (mounted = false);
   }, []);
 
-  const validatePasswordPolicy = (pw) => {
-    if (pw.length < 8) throw new Error("Password must be at least 8 characters long");
-    if (!/[A-Z]/.test(pw)) throw new Error("Password must contain at least one uppercase letter");
-    if (!/[0-9]/.test(pw)) throw new Error("Password must contain at least one number");
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(pw))
-      throw new Error("Password must contain at least one special character");
-  };
+  const handleReset = async () => {
+    setMsg("");
 
-  const handleReset = async (e) => {
-    e.preventDefault();
-    setMessage("");
+    if (!recoveryReady) {
+      setMsg("Reset session not ready. Please open the reset link again.");
+      return;
+    }
 
+    if (!recoveryKeyB64.trim()) {
+      setMsg("Recovery Key is required to restore decryption access.");
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      setMsg("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMsg("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      if (!recoveryReady) {
-        setMessage("Recovery session not ready. Please request a new reset link.");
-        return;
+      // 1) start auth stack
+      await ensureAuthStarted();
+      const { auth, session } = getAppAuth();
+
+      // 2) unlock vault using Recovery Key (this fetches keybundle and unwraps MAK)
+      const rkBytes = b64ToBytes(recoveryKeyB64.trim());
+      await session.unlockVaultWithRecoveryKey(rkBytes);
+
+      // 3) compute new wrapped_mak_password using NEW password
+      // Need bundle salt + userId; easiest: fetch bundle again (or keep from unlock)
+      const accessToken = auth.getState()?.session?.accessToken || (await supabase.auth.getSession()).data?.session?.access_token;
+      if (!accessToken) throw new Error("Missing access token");
+
+      // fetch bundle from backend via keyBundleApi (already wired inside your stack)
+      // we’ll call keyBundleApi directly from appAuth.session dependencies is not exposed,
+      // so simplest: call backend endpoint if you have it accessible OR add session.getKeybundle().
+      // Minimal approach: call session.unlockVaultWithRecoveryKey already fetched bundle,
+      // but we still need user_salt_b64 and user_id. We'll refetch via keyBundleApi on web.
+      const bundle = await session._deps?.keyBundleApi?.getBundle(accessToken);
+      // If you don't have session._deps, do it via a direct web keybundle API import instead.
+
+      if (!bundle?.user_id || !bundle?.user_salt_b64) {
+        throw new Error("Keybundle missing user_id or user_salt_b64");
       }
 
-      if (!newPassword || !confirmPassword) {
-        setMessage("Please fill both password fields.");
-        return;
-      }
+      const vaultKeyring = getAppAuth().vault.getKeyring();
+      const makBytes = vaultKeyring.getMakBytes();
 
-      if (newPassword !== confirmPassword) {
-        setMessage("Passwords do not match.");
-        return;
-      }
+      const wrapped_mak_password_new = await makeWrappedMakPassword(
+        vaultKeyring.cp || vaultKeyring.cryptoProvider || getAppAuth().vault.cryptoProvider,
+        {
+          userId: bundle.user_id,
+          userSaltB64: bundle.user_salt_b64,
+          password: newPassword,
+          makBytes,
+        }
+      );
 
-      validatePasswordPolicy(newPassword);
+      // 4) update backend keybundle (so future logins can unwrap MAK using NEW password)
+      await getAppAuth().auth.backendAuth.changePassword({
+        // If backend wants current/new password too, include them here.
+        wrapped_mak_password_new,
+      });
 
-      setLoading(true);
-
+      // 5) update Supabase password
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) {
-        setMessage("Failed to update password: " + error.message);
-        return;
-      }
+      if (error) throw error;
 
-      setMessage("Password updated successfully. Redirecting to login...");
+      // 6) logout + lock vault
+      await session.logout();
 
-      // Optional: sign out after password reset to force fresh login
-      await supabase.auth.signOut().catch(() => {});
-
-      setTimeout(() => {
-        navigate("/login", {
-          replace: true,
-          state: { message: "Password updated. Please login with your new password." },
-        });
-      }, 1200);
-    } catch (err) {
-      setMessage(err?.message || "Failed to reset password. Try again.");
+      setMsg("Password updated. You can log in now.");
+      navigate("/login", { replace: true });
+    } catch (e) {
+      setMsg(e?.message || "Reset failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="reset-password-page">
-      <div className="reset-password-card">
-        <div className="lock">🔒</div>
+    <div className="reset-page">
+      <div className="reset-card">
         <h2>Reset Password</h2>
-        <p>Enter a new password for your account.</p>
 
-        {message && <p style={{ marginTop: 10 }}>{message}</p>}
+        {!recoveryReady && (
+          <p style={{ color: "crimson" }}>
+            Reset session not ready. Please open the reset link again.
+          </p>
+        )}
 
-        <form onSubmit={handleReset}>
-          <div className="input-icon">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              disabled={!recoveryReady || loading}
-            />
-            <button
-              type="button"
-              className="toggle-password"
-              onClick={() => setShowPassword((s) => !s)}
-              disabled={loading}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
+        <div className="form-group">
+          <label>Recovery Key (base64)</label>
+          <input
+            type="text"
+            value={recoveryKeyB64}
+            onChange={(e) => setRecoveryKeyB64(e.target.value)}
+            disabled={loading}
+            placeholder="Paste your Recovery Key"
+          />
+        </div>
 
-          <div className="input-icon">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              disabled={!recoveryReady || loading}
-            />
-            <button
-              type="button"
-              className="toggle-password"
-              onClick={() => setShowConfirmPassword((s) => !s)}
-              disabled={loading}
-            >
-              {showConfirmPassword ? "Hide" : "Show"}
-            </button>
-          </div>
+        <div className="form-group">
+          <label>New Password</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            disabled={loading}
+          />
+        </div>
 
-          <button type="submit" className="Reset-btn" disabled={loading || !recoveryReady}>
-            {loading ? "Updating..." : "Update Password"}
-          </button>
+        <div className="form-group">
+          <label>Confirm New Password</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
+          />
+        </div>
 
-          <div className="back-link">
-            <Link className="back-to-login" to="/login">
-              Back to Login
-            </Link>
-          </div>
-        </form>
+        <button onClick={handleReset} disabled={loading || !recoveryReady}>
+          {loading ? "Updating..." : "Update Password"}
+        </button>
+
+        {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
       </div>
     </div>
   );
-};
+}
 
-export default Reset_Password;

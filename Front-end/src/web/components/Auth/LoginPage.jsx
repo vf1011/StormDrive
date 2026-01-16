@@ -5,7 +5,7 @@ import { supabase } from "../../../supabase";
 import Notification from "../Transitions/Notification";
 
 // ✅ NEW: use your managers (singleton client)
-import { ensureAuthStarted, getAppAuth } from "../../Auth/appAuthClient"; // adjust path if needed
+import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient"; // adjust path if needed
 
 import Modal from "./Modal";
 import "./styles/LoginPage.css";
@@ -139,7 +139,30 @@ const LoginPage = () => {
       }
 
       // ✅ Zero-knowledge step: unlock vault immediately after password login
-      await sessionMgr.unlockVaultWithPassword(cleanPassword);
+      try {
+          await sessionMgr.unlockVaultWithPassword(cleanPassword);
+          } catch (e) {
+            const msg = String(e?.message || e);
+            // If bundle missing, create it now (first login after email verify)
+            if (msg.toLowerCase().includes("bundle") || msg.includes("404")) {
+              const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
+              const rkB64 = bytesToB64(rkBytes);
+
+              await sessionMgr.completeSignupCrypto({ password: cleanPassword, recoveryKeyBytes: rkBytes });
+              await sessionMgr.unlockVaultWithPassword(cleanPassword);
+
+              setNotification({
+                open: true,
+                message: `Save your Recovery Key now (copy it): ${rkB64}`,
+                severity: "warning",
+              });
+            } else {
+              throw e;
+            }
+          }
+          navigate(from, { replace: true });
+
+      // ✅ Zero-knowledge step: unlock vault immediately after password login
 
       navigate(from, { replace: true });
     } catch (err) {

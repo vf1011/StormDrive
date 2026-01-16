@@ -1,6 +1,8 @@
 // src/components/Register.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { bytesToB64 } from "../../../core/crypto/base64";
+import { cryptoBootstrap } from "../../auth/cryptobootstrap";
 
 import Notification from "../Transitions/Notification";
 import Modal from "./Modal";
@@ -17,6 +19,9 @@ const Register = ({ darkMode = false }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [recoveryKeyB64, setRecoveryKeyB64] = useState("");
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+
 
   // ---- ui state ----
   const [showPassword, setShowPassword] = useState(false);
@@ -85,7 +90,21 @@ const Register = ({ darkMode = false }) => {
       }
 
       // ✅ unlock vault after successful signup (zero-knowledge)
+      // 1) Generate recovery key (must be shown to user)
+      const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
+      const rkB64 = bytesToB64(rkBytes);
+      setRecoveryKeyB64(rkB64);
+
+      // 2) Initialize keybundle + root folder key on backend
+      await sessionMgr.completeSignupCrypto({ password, recoveryKeyBytes: rkBytes });
+
+      // 3) Now unlock vault
       await sessionMgr.unlockVaultWithPassword(password);
+
+      // 4) Force user to save recovery key before entering dashboard
+      setShowRecoveryModal(true);
+      return; // do NOT navigate yet
+
 
       setNotification({
         open: true,
@@ -266,6 +285,29 @@ const Register = ({ darkMode = false }) => {
           }}
         />
       )}
+
+      {showRecoveryModal && (
+  <div className="modal-backdrop">
+    <div className="modal-card">
+      <h3>Save your Recovery Key</h3>
+      <p>
+        This is required for account recovery. If you lose it and forget your password,
+        your files cannot be decrypted.
+      </p>
+      <textarea readOnly value={recoveryKeyB64} style={{ width: "100%", height: 90 }} />
+      <button
+        className="register-btn"
+        onClick={() => {
+          setShowRecoveryModal(false);
+          navigate("/dashboard", { replace: true });
+        }}
+      >
+        I have saved it
+      </button>
+    </div>
+  </div>
+)}
+
 
       <Notification
         open={notification.open}
