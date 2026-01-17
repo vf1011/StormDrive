@@ -86,7 +86,7 @@ export function createAuthManager({ authAdapter, backendAuth }) {
         mfa: { methods, email: cleanEmail },
       });
 
-      return { mfaRequired: true, methods };
+       return { mfaRequired: true, require_2fa: true, methods };
     }
 
     setState({
@@ -96,7 +96,7 @@ export function createAuthManager({ authAdapter, backendAuth }) {
       mfa: { methods: [], email: null },
     });
 
-    return { mfaRequired: false };
+    return { mfaRequired: false, require_2fa: false };
   };
 
   const verifyTotp = async (code) => {
@@ -129,7 +129,7 @@ const register = async ({ name, email, password, confirmPassword }) => {
   if (!password) throw new Error("Enter password");
   if (password !== confirmPassword) throw new Error("Passwords do not match");
 
-  // 1) Create backend user record
+  // Backend already creates the Supabase user (/auth/signup)
   await backendAuth.signup({
     name: cleanName,
     email: cleanEmail,
@@ -137,21 +137,10 @@ const register = async ({ name, email, password, confirmPassword }) => {
     confirm_password: confirmPassword,
   });
 
-  // 2) Supabase signup (may return null session if email confirmation is required)
-  const { session } = await authAdapter.signUp(cleanEmail, password, { name: cleanName });
-
-  // ✅ If we got a session, update manager state immediately
-  if (session?.accessToken) {
-    setState({
-      status: "AUTHENTICATED",
-      session,
-      user: session.user,
-      mfa: { methods: [], email: null },
-    });
-  }
-
-  return { session: session || null };
+  // No Supabase signUp here (avoid "User already registered")
+  return { session: null };
 };
+
 
 
   const logout = async () => {
