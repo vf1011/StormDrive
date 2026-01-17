@@ -18,7 +18,7 @@ from app.actions.foldertrashCommand import TrashFolderCommand, TrashFolderBulkCo
 from app.storage.local_cipherblob import cipherCloneStorage
 
 from app.security.name_validator import _validate_name
-from app.domain.persistance.models.dash_models import Folder
+
 logger = logging.getLogger(__name__)
 
 
@@ -173,22 +173,6 @@ class FolderService:
         }
 
 
-    async def list_root_folders(self, session: AsyncSession, user_id: str) -> List[Folder]:
-        roots = await self.folder_repo.list_root_folders(session, user_id=user_id)
-
-        seen = set()
-        unique = []
-        for f in roots:
-            name = (f.folder_name or "").strip().lower()
-            if name and name in seen:
-                continue
-            seen.add(name)
-            unique.append(f)
-
-        return unique
-    async def bootstrap_default_folders(self, session, user_id: str, entries: list):
-        async with session.begin():
-            return await self.folder_repo.create_missing_bootstrap_folders(session, user_id, entries)
     async def rename_folder(
         self,
         session: AsyncSession,
