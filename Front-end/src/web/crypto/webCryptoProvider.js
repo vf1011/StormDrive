@@ -1,5 +1,5 @@
 // npm i argon2-browser
-import * as argon2 from "argon2-browser";
+import argon2BundleUrl from "argon2-browser/dist/argon2-bundled.min.js?url";
 
 /** @returns {boolean} */
 function hasWebCrypto() {
@@ -49,6 +49,7 @@ async function hkdfExpand(prk, info, len) {
   return okm.slice(0, len);
 }
 
+<<<<<<< HEAD
 // ----------------------
 // NEW: AAD normalization
 // ----------------------
@@ -71,28 +72,66 @@ function toBytes(x) {
   throw new Error("Unsupported AAD type; use string, Uint8Array, or ArrayBuffer");
 }
 
+=======
+
+let _argon2Ready;
+
+/** Load argon2 bundle once and return global argon2 */
+async function getArgon2Global() {
+  if (_argon2Ready) return _argon2Ready;
+
+  _argon2Ready = new Promise((resolve, reject) => {
+    // if already loaded
+    if (typeof window !== "undefined" && window.argon2?.hash) {
+      return resolve(window.argon2);
+    }
+
+    const s = document.createElement("script");
+    s.src = argon2BundleUrl;
+    s.async = true;
+
+    s.onload = () => {
+      if (window.argon2?.hash) resolve(window.argon2);
+      else reject(new Error("argon2 bundle loaded but window.argon2.hash missing"));
+    };
+    s.onerror = () => reject(new Error("failed to load argon2 bundle"));
+    document.head.appendChild(s);
+  });
+
+  return _argon2Ready;
+}
+
+
+>>>>>>> 77f2c03c30354bce44987e97c7576d8e6d1c4d4a
 export class WebCryptoProvider {
-  randomBytes(len) {
+ randomBytes(len) {
     const out = new Uint8Array(len);
     crypto.getRandomValues(out);
     return out;
   }
 
   async argon2id(passwordUtf8, salt, params) {
-    // argon2-browser expects strings/Uint8Array; pass bytes
+    const argon2 = await getArgon2Global();
+
+    const type = argon2.ArgonType?.Argon2id ?? argon2.argon2id ?? 2;
+
     const res = await argon2.hash({
       pass: passwordUtf8,
       salt,
       time: params.timeCost,
+<<<<<<< HEAD
       mem: params.memoryKiB, // KiB
+=======
+      mem: params.memoryKiB,
+>>>>>>> 77f2c03c30354bce44987e97c7576d8e6d1c4d4a
       parallelism: params.parallelism,
       hashLen: params.hashLen,
-      type: argon2.ArgonType.Argon2id,
+      type,
     });
 
-    // res.hash is Uint8Array in argon2-browser
     return res.hash instanceof Uint8Array ? res.hash : new Uint8Array(res.hash);
   }
+
 
   async hkdfExtract(salt, ikm) {
     return hmacSha256(salt, ikm);

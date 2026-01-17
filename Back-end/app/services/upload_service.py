@@ -57,7 +57,7 @@ class UploadServices:
         if file_size == 0 :
             return 1
         return (file_size + chunk_size - 1) // chunk_size
-    
+
     def aad_bytes(self, upload:UploadSession, chunk_idx:int)->bytes:
         enc_stream_id = str(upload.upload_id).encode("utf-8")
         prefix = f"SD:C1|v{self.C1_SCHEMA_VERSION}|".encode("utf-8")
@@ -77,6 +77,7 @@ class UploadServices:
             if 0 <= i < total_chunks:
                 b[i // 8] |= (1 << (i % 8))
         return base64.b64encode(bytes(b)).decode("ascii") 
+        
 
     async def init_session(self, session:AsyncSession,user_id:str,
                            file_name:str,file_size:int,file_type:str,

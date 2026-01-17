@@ -2,7 +2,7 @@ from fastapi import APIRouter , Depends , HTTPException , status as http_status,
 from app.schemas.auth_schema import UserSignUp , UserLogin , ActivityType , User , updateUserProfile , changePassword , AuthResponse , Token,SSResponse,SSRequest
 from app.config.auth.supabase_client import get_async_supabase
 from supabase import AsyncClient
-from app.api.dependencies import log_activity , get_current_user
+from app.api.dependencies import get_current_user
 from app.domain.persistance.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.security.rate_limit import limiter

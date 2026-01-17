@@ -26,6 +26,7 @@ class KeyBundle(Base):
     user_salt_b64 = Column(Text, nullable=False) # usersalt for cs
 
     wrapped_mak_b64 = Column(Text, nullable=False)
+    wrapped_mak_recovery_b64 = Column(Text, nullable=False)
 
     wrapp_algo = Column(String(64), nullable=False, default="AES-256-GCM")
     wrapp_nonce_b64 = Column(Text, nullable=False)
@@ -38,3 +39,4 @@ class KeyBundle(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+

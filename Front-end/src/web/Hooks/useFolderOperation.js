@@ -1,7 +1,7 @@
 // src/web/hooks/useFolderOperation.jsx
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../supabase";
-import { API_BASE_URL} from "../../core/api/config";
+import { API_BASE_URL} from "../api/config";
 
 // ✅ IMPORTANT: use the SAME FileContext file everywhere (toolbar + managers + hooks)
 import { useFileContext } from "../Hooks/filecontext";

@@ -80,11 +80,15 @@ class FolderTreeRepository:
 
         unique_name = await self.generate_unq_name(session, user_id, parent_folder_id, fname)
 
-        root_folder = self.folder_repo.copy(session,user_id=user_id,folder_name=unique_name,
-                                            parent_folder_id=parent_folder_id,heirarchy_path=None,
-                                            depth=depth
-                                        )
-        
+        root_folder = await self.folder_repo.copy(
+                            session=session,
+                            user_id=user_id,
+                            folder_name=unique_name,
+                            parent_folder_id=parent_folder_id,
+                            heirarchy_path=None,
+                            depth=depth,
+            )
+
         root_folder.heirarchy_path = self.compute_path(parent_folder,int(root_folder.folder_id))
         return root_folder
     

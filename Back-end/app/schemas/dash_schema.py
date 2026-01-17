@@ -337,3 +337,25 @@ class MultiFilePlanRequest(BaseModel):
     file_ids: List[UUID]
     include_parent_paths: bool = True
     include_virtual_root: bool = False
+
+class EncFolderKeys(BaseModel):
+    wrapped_fk_b64: str
+    nonce_fk_b64: str
+    wrapped_fok_b64: str
+    nonce_fok_b64: str
+    wrap_alg: str = "AESGCM"
+
+class BootstrapFolderNode(BaseModel):
+    folder_uid: UUID
+    name: str
+    parent_folder_uid: Optional[UUID] = None
+    enc: EncFolderKeys
+
+class BootstrapDefaultsRequest(BaseModel):
+    root: BootstrapFolderNode
+    children: List[BootstrapFolderNode] = Field(default_factory=list)
+
+class BootstrapDefaultsResponse(BaseModel):
+    root_folder_uid: UUID
+    created_folder_uids: List[UUID]
+    existing_folder_uids: List[UUID]

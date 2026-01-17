@@ -13,7 +13,7 @@ from app.schemas.dash_schema import (FolderRenameRequest, FolderRenameResponse, 
                                      , MultipleFolderCopyRequest, MultipleFolderCopyResponse, MultipleFolderDeleteRequest, MultipleFolderDeleteResponse
                                      ,MultipleFolderPermDeleteRequest,MultipleFolderPermDeleteResponse,MultipleFolderRestoreRequest,MultipleFolderRestoreResponse
                                      ,FolderUploadChildFile,FolderUploadChildStatus,FolderUploadRequest,FolderUploadResponse
-                                     ,FolderUploadStatusResponse,FolderDownloadPlanRequest, FolderDownloadPlanResponse)
+                                     ,FolderUploadStatusResponse,FolderDownloadPlanRequest, FolderDownloadPlanResponse,BootstrapDefaultsRequest, BootstrapDefaultsResponse)
 
 from app.repositories.folder_repository import FolderRepository
 from app.repositories.undo_redo_repository import UndoRedoRepository
@@ -66,6 +66,7 @@ def _user_id(user: User) -> str:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user context")
     return str(uid)
 
+<<<<<<< HEAD
 @router.get("/list")
 async def list_root_folders(current_user=Depends(get_current_user), session=Depends(get_db)):
     try:
@@ -86,6 +87,34 @@ async def list_root_folders(current_user=Depends(get_current_user), session=Depe
 
     except FileExistsError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+=======
+@router.post("/bootstrap-defaults", response_model=BootstrapDefaultsResponse)
+async def bootstrap_defaults(
+    payload: BootstrapDefaultsRequest,
+    session: AsyncSession = Depends(get_db_tx),
+    user: User = Depends(get_current_user),
+) -> BootstrapDefaultsResponse:
+    uid = _user_id(user)
+
+    try:
+        result = await _folder_service.bootstrap_defaults_with_keys(
+            session=session,
+            user_id=uid,
+            root=payload.root.model_dump(),
+            children=[c.model_dump() for c in payload.children],
+        )
+        return BootstrapDefaultsResponse(
+            root_folder_uid=UUID(result["root_folder_uid"]),
+            created_folder_uids=[UUID(x) for x in result["created_folder_uids"]],
+            existing_folder_uids=[UUID(x) for x in result["existing_folder_uids"]],
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+    except Exception:
+        logger.exception("bootstrap-defaults failed", extra={"user_id": uid})
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Bootstrap failed")
+
+>>>>>>> 77f2c03c30354bce44987e97c7576d8e6d1c4d4a
 
 @router.post("/rename", response_model=FolderRenameResponse)
 async def rename_folder(
@@ -258,7 +287,7 @@ async def get_recycle_bin_folders(
 ):
     uid = _user_id(current_user)
     try:
-        folders = await FolderRepository.list_deleted_folders(session, parent_folder_id=parent_folder_id,user_id=uid)
+        folders = await folder_repo.list_deleted_folders(session, parent_folder_id=parent_folder_id,user_id=uid)
         if not folders:
             raise LookupError("Folder Not Found.")
         
@@ -285,8 +314,8 @@ async def init_folder_upload(
         fus, root_id, root_name, plans = await _folder_folder_service.init_folder_upload(
                 session=session,
                 user_id=user.user_id,
-                root_folder_name=payload.root_folder_name,
-                parent_folder_id=payload.parent_folder_id,
+                folder_name=payload.root_folder_name,                 
+                parent_folder_id=payload.parent_folder_id or 0,
                 entries=payload.entries,
                 chunk_size=payload.chunk_size,
             )
