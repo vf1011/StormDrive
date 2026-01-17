@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from datetime import datetime , timedelta
 from app.domain.persistance.database import Base          
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 import uuid
 import re
 
@@ -141,6 +142,13 @@ class Folder(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True)
 
+    folder_uid: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+        index=True,
+        default=uuid.uuid4,
+    )
+
     parent_folder = relationship('Folder', remote_side=[folder_id], back_populates="subfolders")
     files = relationship('File', back_populates='folder', cascade="all, delete-orphan")
     subfolders = relationship('Folder', back_populates='parent_folder', cascade="all, delete-orphan")
@@ -182,6 +190,25 @@ class Folder(Base):
             })
 
         return data
+    
+class FolderKeys(Base):
+    __tablename__ = "folder_keys"
+
+    folder_id: Mapped[int] = mapped_column(ForeignKey("folders.folder_id", ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[str] = mapped_column(Text, nullable=False, index=True)
+
+    wrapped_fk: Mapped[bytes] = mapped_column(nullable=False)
+    nonce_fk: Mapped[bytes] = mapped_column(nullable=False)
+
+    wrapped_fok: Mapped[bytes] = mapped_column(nullable=False)
+    nonce_fok: Mapped[bytes] = mapped_column(nullable=False)
+
+    wrap_alg: Mapped[str] = mapped_column(Text, nullable=False, default="AESGCM")
+    wrapped_by_folder_id: Mapped[int | None] = mapped_column(ForeignKey("folders.folder_id", ondelete="SET NULL"), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
 
 #  Recycle Bin 
 class RecycleBin(Base):

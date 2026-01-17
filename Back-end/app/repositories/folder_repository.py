@@ -1,17 +1,48 @@
 import logging
 from typing import Optional , List, Tuple
 
-from sqlalchemy import select, func, update, delete, Text
+from sqlalchemy import select, func, update, delete, Text, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import false
 from datetime import datetime
 
 from app.domain.persistance.models.dash_models import Folder , File
 
+import uuid
+
 logger = logging.getLogger(__name__)
 
 
 class FolderRepository:
+    async def get_by_uid(self, session: AsyncSession, user_id: str, folder_uid: uuid.UUID) -> Optional[Folder]:
+        res = await session.execute(
+            select(Folder)
+            .where(Folder.user_id == user_id)
+            .where(Folder.folder_uid == folder_uid)
+            .where(Folder.is_deleted.is_(False))
+            .limit(1)
+        )
+        return res.scalar_one_or_none()
+    
+    async def create_with_uid(self,session: AsyncSession,user_id: str,folder_uid: uuid.UUID,folder_name: str,parent_folder_id: Optional[int],depth: int,    heirarchy_path: Optional[str] = None,
+                              ) -> Folder:
+        new_folder = Folder(
+            user_id=user_id,
+            folder_uid=folder_uid,
+            folder_name=folder_name,
+            parent_folder_id=parent_folder_id,
+            is_shared=False,
+            is_deleted=False,
+            depth_level=depth,
+            heirarchy_path=heirarchy_path,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            deleted_at=None,
+        )
+        session.add(new_folder)
+        await session.flush()  
+        return new_folder
+    
     async def get_active_folder(
         self, session: AsyncSession, user_id: str, folder_id: int
     ) -> Optional[Folder]:
@@ -32,7 +63,7 @@ class FolderRepository:
         folder_name: str,
         exclude_curr_folder_id: int,
     ) -> bool:
-        stmt = select(Folder.folder_id).where(Folder.user_id == user_id).where(Folder.is_deleted.is_(False))
+        stmt = select(Folder).where(Folder.user_id == user_id).where(Folder.is_deleted.is_(False))
 
         if parent_folder_id is None:
             stmt = stmt.where(Folder.parent_folder_id.is_(None))
@@ -47,6 +78,7 @@ class FolderRepository:
 
         res = await session.execute(stmt)
         return res.scalar_one_or_none() is not None
+
     
     async def get_active_folders_by_ids(
         self,

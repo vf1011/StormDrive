@@ -1,4 +1,5 @@
 import logging , os
+import base64
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from typing import List, Dict , Optional
@@ -6,6 +7,7 @@ from app.repositories.folder_repository import FolderRepository
 from app.repositories.undo_redo_repository import UndoRedoRepository
 from app.repositories.file_repository import FileRepository
 from app.repositories.trash_repository import RecyclebinRepository
+from app.repositories.folder_key_repository import FolderKeysRepository
 from app.services.event.websocket_manager import websocket_manager  
 
 from app.actions.renameCommand import RenameFolderCommand
@@ -21,13 +23,155 @@ logger = logging.getLogger(__name__)
 
 
 class FolderService:
-    def __init__(self, folder_repo: FolderRepository, undo_repo: UndoRedoRepository, file_repo: FileRepository, trash_repo:RecyclebinRepository, upload_root:str, recycle_root:str):
+    def __init__(self, folder_repo: FolderRepository, undo_repo: UndoRedoRepository, file_repo: FileRepository, trash_repo:RecyclebinRepository, 
+                 upload_root:str, recycle_root:str,key_repo : FolderKeysRepository):
         self.folder_repo = folder_repo
         self.undo_repo = undo_repo
         self.file_repo = file_repo
         self.trash_repo = trash_repo
         self.upload_root = upload_root
         self.recycle_root = recycle_root
+        self.key_repo = key_repo
+
+    def _b64(s: str) -> bytes:
+        try:
+            return base64.b64decode(s, validate=True)
+        except Exception:
+            raise ValueError("Invalid base64 in enc payload")
+
+    async def bootstrap_defaults_with_keys(
+        self,
+        session: AsyncSession,
+        user_id: str,
+        root: dict,
+        children: list[dict],
+    ) -> dict:
+        """
+        root/children dicts are BootstrapFolderNode.model_dump()
+        Idempotent:
+        - folders are created if missing (by folder_uid, fallback by name for root)
+        - keys are inserted if missing; conflict if different payload already exists
+        """
+        created: list[str] = []
+        existing: list[str] = []
+
+        async with session.begin():
+            # ---- 1) Root ----
+            root_uid = root["folder_uid"]
+            root_name = _validate_name(root["name"])
+
+            root_folder = await self.folder_repo.get_by_uid(session, user_id, root_uid)
+
+            if not root_folder:
+                # Optional: also allow "root by name at parent None" to avoid duplicate roots
+                by_name = await self.folder_repo.name_exists_in_parent_folder(session, user_id, None, root_name)
+                if by_name:
+                    root_folder = by_name
+                    existing.append(str(root_uid))
+                    # IMPORTANT: if existing folder has no folder_uid set (old rows), you should set it:
+                    root_folder.folder_uid = root_uid
+                    session.add(root_folder)
+                    await session.flush()
+                else:
+                    root_folder = await self.folder_repo.create_with_uid(
+                        session,
+                        user_id=user_id,
+                        folder_uid=root_uid,
+                        folder_name=root_name,
+                        parent_folder_id=None,
+                        depth=0,
+                        heirarchy_path=None,
+                    )
+                    root_folder.heirarchy_path = str(int(root_folder.folder_id))
+                    session.add(root_folder)
+                    created.append(str(root_uid))
+
+            else:
+                existing.append(str(root_uid))
+
+            # store root keys (wrapped by MAK => wrapped_by_folder_id=None)
+            renc = root["enc"]
+            await self.key_repo.ensure(
+                session,
+                user_id=user_id,
+                folder_id=int(root_folder.folder_id),
+                wrapped_fk=self._b64(renc["wrapped_fk_b64"]),
+                nonce_fk=self._b64(renc["nonce_fk_b64"]),
+                wrapped_fok=self._b64(renc["wrapped_fok_b64"]),
+                nonce_fok=self._b64(renc["nonce_fok_b64"]),
+                wrap_alg=renc.get("wrap_alg", "XCHACHA20POLY1305"),
+                wrapped_by_folder_id=None,
+            )
+
+            # Map uid -> folder row for parent resolution
+            uid_to_folder = {str(root_uid): root_folder}
+
+            # ---- 2) Children (supports nested if parents appear earlier or already exist) ----
+            for ch in children:
+                ch_uid = ch["folder_uid"]
+                ch_name = _validate_name(ch["name"])
+                parent_uid = ch.get("parent_folder_uid") or root_uid
+
+                # resolve parent folder row
+                parent = uid_to_folder.get(str(parent_uid))
+                if not parent:
+                    parent = await self.folder_repo.get_by_uid(session, user_id, parent_uid)
+                    if not parent:
+                        raise ValueError(f"Parent folder_uid not found: {parent_uid}")
+                    uid_to_folder[str(parent_uid)] = parent
+
+                # ensure folder exists by uid
+                ch_folder = await self.folder_repo.get_by_uid(session, user_id, ch_uid)
+                if not ch_folder:
+                    # also prevent duplicates by name under the same parent
+                    dup = await self.folder_repo.name_exists_in_parent_folder(session, user_id, int(parent.folder_id), ch_name)
+                    if dup:
+                        ch_folder = dup
+                        ch_folder.folder_uid = ch_uid  # bind legacy row to uid
+                        session.add(ch_folder)
+                        await session.flush()
+                        existing.append(str(ch_uid))
+                    else:
+                        ch_folder = await self.folder_repo.create_with_uid(
+                            session,
+                            user_id=user_id,
+                            folder_uid=ch_uid,
+                            folder_name=ch_name,
+                            parent_folder_id=int(parent.folder_id),
+                            depth=int(parent.depth_level or 0) + 1,
+                            heirarchy_path=None,
+                        )
+                        # update hierarchy path after we have folder_id
+                        parent_path = parent.heirarchy_path or str(int(parent.folder_id))
+                        ch_folder.heirarchy_path = f"{parent_path}/{int(ch_folder.folder_id)}"
+                        session.add(ch_folder)
+                        created.append(str(ch_uid))
+
+                else:
+                    existing.append(str(ch_uid))
+
+                uid_to_folder[str(ch_uid)] = ch_folder
+
+                # store child keys (wrapped by PARENT_FOK => wrapped_by_folder_id = parent.folder_id)
+                cenc = ch["enc"]
+                await self.key_repo.ensure(
+                    session,
+                    user_id=user_id,
+                    folder_id=int(ch_folder.folder_id),
+                    wrapped_fk=self._b64(cenc["wrapped_fk_b64"]),
+                    nonce_fk=self._b64(cenc["nonce_fk_b64"]),
+                    wrapped_fok=self._b64(cenc["wrapped_fok_b64"]),
+                    nonce_fok=self._b64(cenc["nonce_fok_b64"]),
+                    wrap_alg=cenc.get("wrap_alg", "AESGCM"),
+                    wrapped_by_folder_id=int(parent.folder_id),
+                )
+
+        return {
+            "root_folder_uid": str(root_uid),
+            "created_folder_uids": created,
+            "existing_folder_uids": existing,
+        }
+
 
     async def rename_folder(
         self,
