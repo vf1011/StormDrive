@@ -1,7 +1,7 @@
 // src/fileOps/move/moveLogic.js
 
-import { moveFilesApi } from "../../web/api/filesapi";
-import { moveFoldersApi } from "../../web/api/folderapi";
+import { moveFilesApi } from ".../../web/api/filesapi";
+import { moveFoldersApi } from ".../../web/api/folderapi";
 
 // Normalise id like in your old code
 export function getItemId(item) {

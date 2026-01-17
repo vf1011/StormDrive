@@ -86,7 +86,7 @@ export function createAuthManager({ authAdapter, backendAuth }) {
         mfa: { methods, email: cleanEmail },
       });
 
-      return { mfaRequired: true, require_2fa: true, methods };
+       return { mfaRequired: true, require_2fa: true, methods };
     }
 
     setState({
@@ -98,9 +98,6 @@ export function createAuthManager({ authAdapter, backendAuth }) {
 
     return { mfaRequired: false, require_2fa: false };
   };
-
-  const login = async ({ email, password }) => loginWithPassword(email, password);
-
 
   const verifyTotp = async (code) => {
     const digits = (code || "").replace(/\D/g, "").slice(0, 6);
@@ -160,7 +157,6 @@ const register = async ({ name, email, password, confirmPassword }) => {
     refreshSession,
 
     loginWithPassword,
-    login,
     verifyTotp,
     verifyEmailOtp,
     register,

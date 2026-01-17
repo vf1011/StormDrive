@@ -103,7 +103,7 @@ Keep this safe. If you lose it and forget your password, your files cannot be re
       // 2) Login: required to obtain session/tokens so crypto bootstrap can call protected endpoints
       let loginRes;
       try {
-        loginRes = await auth.login({email : cleanEmail, password });
+        loginRes = await auth.login({ email: cleanEmail, password });
       } catch (err) {
         // If email verification is enabled later, login can fail until verified
         setShowModal(true);

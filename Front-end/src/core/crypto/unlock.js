@@ -1,4 +1,4 @@
-import { utf8 } from "../crypto/provider.js";
+import { utf8 } from "./provider.js";
 
 export const DEFAULT_ARGON2 = {
   timeCost: 3,

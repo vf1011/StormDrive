@@ -7,7 +7,7 @@ import { supabaseAuthProvider } from "./supabaseAuthProvider.js";
 import { createBackendAuthApi } from "./backendAuthApi.js";
 
 import { keybundleInit, getKeybundle } from "../api/keybundleAPI.js";
-import { initFolderApi } from "../api/folderApi.js";
+import { initFolderApi } from "../api/folderapi.js";
 
 import { keyring } from "./keyringSingleton.js";
 import { cryptoBootstrap } from "./cryptoBootstrap.js"; // ✅ ensure file name matches
