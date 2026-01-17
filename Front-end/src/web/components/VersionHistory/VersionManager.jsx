@@ -4,7 +4,7 @@ import ModalPortal from "../Dashboard/Modalportal";
 import { supabase } from "../../../supabase";
 import { formatDate , formatSize } from "../../../utils";
 import "./VersionManager.css";
-import { API_BASE_URL } from "../../../core/api/config";
+import { API_BASE_URL } from "../../api/config";
 
 const API = API_BASE_URL;
 

@@ -1,4 +1,4 @@
-import { bytesToB64, b64ToBytes } from "../utils/base64.js";
+import { bytesToB64, b64ToBytes } from "./base64.js";
 import { utf8 } from "./provider.js";
 
 /**

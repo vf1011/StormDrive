@@ -1,5 +1,5 @@
 // src/web/auth/backendAuthApi.js
-import { API_BASE_URL } from "../../api/config";
+import { API_BASE_URL } from "../api/config";
 
 async function jsonOrEmpty(res) {
   return res.json().catch(() => ({}));
@@ -7,8 +7,16 @@ async function jsonOrEmpty(res) {
 
 async function readErr(res) {
   const d = await jsonOrEmpty(res);
-  return d?.detail || d?.message || `HTTP ${res.status}`;
+  const detail = d?.detail ?? d?.message ?? `HTTP ${res.status}`;
+
+  if (typeof detail === "string") return detail;
+  try {
+    return JSON.stringify(detail, null, 2); // ✅ shows FastAPI 422 errors
+  } catch {
+    return `HTTP ${res.status}`;
+  }
 }
+
 
 export function createBackendAuthApi({ getAccessToken }) {
   const base = String(API_BASE_URL || "").replace(/\/+$/, "");
@@ -169,4 +177,3 @@ export function createBackendAuthApi({ getAccessToken }) {
   };
 }
 
-export default backendAuthApi;

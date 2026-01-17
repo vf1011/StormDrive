@@ -8,7 +8,7 @@ import ThemeToggle from "../Styles/ThemeToggle";
 import PageTransition from "../Transitions/PageTransition";
 import "./Styles/DashboardNav.css";
 import Logo from "../Logo";
-import { API_BASE_URL } from "../../../core/api/config";
+import { API_BASE_URL } from "../../api/config";
 
 const MAX_QUERY_LEN = 128;
 

@@ -25,7 +25,7 @@ async def get_keybundle(
         async with session.begin():
             return await _kb_service.get(session, uid)
     except HTTPException as he:
-        log.error("Error in getting key bundle", error=str(he))
+        log.error("Error in getting key bundle", str(he))
         raise he
     except Exception as e:
         print(f"Error in getting key bundle: {e}")
@@ -43,7 +43,7 @@ async def init_keybundle(
     try:
         return await _kb_service.init(session, uid, payload)
     except HTTPException as he:
-        log.error("Error in storing key bundle", error=str(he))
+        log.error("Error in storing key bundle", str(he))
         raise he
     except Exception as e:
         print(f"Error in storing key bundle: {e}")

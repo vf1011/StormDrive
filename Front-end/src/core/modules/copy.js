@@ -1,7 +1,7 @@
 // src/fileOps/copy/copyLogic.js
  
-import { copyFilesApi } from "../api/filesapi";
-import { copyFoldersApi } from "../api/folderapi";
+import { copyFilesApi } from "../../web/api/filesapi";
+import { copyFoldersApi } from "../../web/api/folderapi";
 
 export function getItemId(item) {
   if (!item) return null;

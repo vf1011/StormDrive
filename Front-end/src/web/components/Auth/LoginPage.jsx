@@ -4,11 +4,15 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../../supabase";
 import Notification from "../Transitions/Notification";
 
-// ✅ NEW: use your managers (singleton client)
-import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient"; // adjust path if needed
-
 import Modal from "./Modal";
 import "./styles/LoginPage.css";
+
+// ✅ managers (singleton client)
+import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient";
+
+// ✅ needed for “bundle missing → create bundle” fallback
+import { bytesToB64 } from "../../../core/crypto/base64";
+import { cryptoBootstrap } from "../../auth/cryptoBootstrap.js";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +29,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // keep your existing message/error behavior
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -44,7 +47,8 @@ const LoginPage = () => {
   const logoutMessage = location.state?.message;
   const logoutReason = location.state?.reason;
 
-  const errorMessage = (err) => err?.response?.data?.detail ?? err?.message ?? String(err);
+  const errorMessage = (err) =>
+    err?.response?.data?.detail ?? err?.message ?? String(err);
 
   // ✅ Start auth/session managers once when page mounts
   useEffect(() => {
@@ -73,8 +77,47 @@ const LoginPage = () => {
     clearSessionOnLoad();
   }, [location.state, logoutMessage]);
 
+  const isKeybundleMissing = (e) => {
+    const status = e?.response?.status;
+    const code = e?.response?.data?.detail?.code;
+
+    if (status === 404 && code === "KEYBUNDLE_MISSING") return true;
+
+    // fallback for non-axios errors
+    const msg = String(e?.message || e || "");
+    return (
+      msg.includes("KEYBUNDLE_MISSING") ||
+      msg.includes('"KEYBUNDLE_MISSING"') ||
+      msg.includes("404")
+    );
+  };
+
+  function downloadRecoveryKeyFile(userEmail, rkB64) {
+    const content =
+`StormDrive Recovery Key
+
+Email: ${userEmail}
+RecoveryKey(Base64): ${rkB64}
+
+Keep this safe. If you lose it and forget your password, your files cannot be recovered.
+`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `stormdrive-recovery-key-${String(userEmail || "account").replace(/[^a-z0-9]/gi, "_")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   // Magic-link email backup (no OTP code)
   const chooseEmailLink = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     setError("");
     try {
@@ -98,6 +141,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
     setIsLoading(true);
     setError("");
 
@@ -110,14 +154,17 @@ const LoginPage = () => {
       await ensureAuthStarted();
       const { auth, session: sessionMgr } = getAppAuth();
 
+      // Password login
       const result = await auth.loginWithPassword(cleanEmail, cleanPassword);
 
+      // MFA required
       if (result?.mfaRequired) {
         setIsTotpEnabled(true);
 
-        const m = Array.isArray(result.methods) && result.methods.length
-          ? result.methods
-          : ["totp", "email_backup"];
+        const m =
+          Array.isArray(result.methods) && result.methods.length
+            ? result.methods
+            : ["totp", "email_backup"];
 
         setMethods(m);
 
@@ -138,31 +185,33 @@ const LoginPage = () => {
         return;
       }
 
-      // ✅ Zero-knowledge step: unlock vault immediately after password login
+      // ✅ Zero-knowledge: unlock vault after password login
       try {
+        await sessionMgr.unlockVaultWithPassword(cleanPassword);
+      } catch (e2) {
+        if (isKeybundleMissing(e2)) {
+          // First login where bundle wasn't created yet
+          const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
+          const rkB64 = bytesToB64(rkBytes);
+
+          await sessionMgr.completeSignupCrypto({
+            password: cleanPassword,
+            recoveryKeyBytes: rkBytes,
+          });
+
           await sessionMgr.unlockVaultWithPassword(cleanPassword);
-          } catch (e) {
-            const msg = String(e?.message || e);
-            // If bundle missing, create it now (first login after email verify)
-            if (msg.toLowerCase().includes("bundle") || msg.includes("404")) {
-              const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
-              const rkB64 = bytesToB64(rkBytes);
 
-              await sessionMgr.completeSignupCrypto({ password: cleanPassword, recoveryKeyBytes: rkBytes });
-              await sessionMgr.unlockVaultWithPassword(cleanPassword);
+          downloadRecoveryKeyFile(cleanEmail, rkB64);
 
-              setNotification({
-                open: true,
-                message: `Save your Recovery Key now (copy it): ${rkB64}`,
-                severity: "warning",
-              });
-            } else {
-              throw e;
-            }
-          }
-          navigate(from, { replace: true });
-
-      // ✅ Zero-knowledge step: unlock vault immediately after password login
+          setNotification({
+            open: true,
+            message: "Vault initialized. Recovery key downloaded.",
+            severity: "warning",
+          });
+        } else {
+          throw e2;
+        }
+      }
 
       navigate(from, { replace: true });
     } catch (err) {
@@ -175,6 +224,7 @@ const LoginPage = () => {
   };
 
   const handleVerifyMfa = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     setError("");
 
@@ -204,8 +254,32 @@ const LoginPage = () => {
 
       await auth.verifyTotp(code);
 
-      // ✅ Unlock vault (password still in state)
-      await sessionMgr.unlockVaultWithPassword(password);
+      // ✅ Unlock vault after MFA
+      try {
+        await sessionMgr.unlockVaultWithPassword(password);
+      } catch (e2) {
+        if (isKeybundleMissing(e2)) {
+          const rkBytes = cryptoBootstrap.generateRecoveryKeyBytes();
+          const rkB64 = bytesToB64(rkBytes);
+
+          await sessionMgr.completeSignupCrypto({
+            password,
+            recoveryKeyBytes: rkBytes,
+          });
+
+          await sessionMgr.unlockVaultWithPassword(password);
+
+          downloadRecoveryKeyFile(email, rkB64);
+
+          setNotification({
+            open: true,
+            message: "Vault initialized. Recovery key downloaded.",
+            severity: "warning",
+          });
+        } else {
+          throw e2;
+        }
+      }
 
       navigate(from, { replace: true });
     } catch (err) {
@@ -240,9 +314,13 @@ const LoginPage = () => {
   }, [logoutReason]);
 
   const modalView =
-    stage === "chooseMethod" ? "chooseMethod" :
-    stage === "emailLinkSent" ? "emailLinkSent" :
-    stage === "mfaChallenge" ? "totp" : null;
+    stage === "chooseMethod"
+      ? "chooseMethod"
+      : stage === "emailLinkSent"
+      ? "emailLinkSent"
+      : stage === "mfaChallenge"
+      ? "totp"
+      : null;
 
   return (
     <div className="login-page">
@@ -252,7 +330,9 @@ const LoginPage = () => {
             <h2>Welcome Back!</h2>
             <p>Access your secure cloud storage with Stormdrive. Your files are just a login away.</p>
             <p>New to Stormdrive? Join us to experience unlimited storage!</p>
-            <Link to="/register" className="register-button">Sign Up Now</Link>
+            <Link to="/register" className="register-button">
+              Sign Up Now
+            </Link>
           </div>
           <div className="illustration">
             <img src="/images/login.svg" alt="Login illustration" />
@@ -261,7 +341,6 @@ const LoginPage = () => {
 
         <div className="right-side">
           <h2>Login</h2>
-
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -358,8 +437,6 @@ const LoginPage = () => {
           setResendIn(0);
         }}
         loading={isLoading}
-
-        // chooseMethod
         isTotpEnabled={isTotpEnabled}
         onChooseEmail={() => {
           setSelectedMethod("email_backup");
@@ -371,13 +448,9 @@ const LoginPage = () => {
           setMfaCode("");
           setStage("mfaChallenge");
         }}
-
-        // emailLinkSent
         email={email}
         resendIn={resendIn}
         onResend={resendMagicLink}
-
-        // totp
         title="Two-Factor Authentication"
         description="Enter the 6-digit code from your authenticator app."
         code={mfaCode}

@@ -1,36 +1,17 @@
 // src/web/auth/cryptoBootstrap.js
-// Web-only crypto bootstrap used by sessionManager.completeSignupCrypto().
-// Responsibilities:
-// - Generate userSalt + MAK
-// - Wrap MAK for password + recovery (keybundle/init payload)
-// - Create root folder FoK and wrap under MAK (folder/init-folder payload)
-//
-// This uses ONLY client-side crypto; backend stores only wrapped blobs.
 
-import { bytesToB64, b64ToBytes } from "../../core/crypto/base64.js";
-import { wrapBytesV1 } from "../../core/crypto/envelope.js";
+import { bytesToB64 } from "../../core/crypto/base64.js";
 import { deriveCs, deriveKekUnlock, deriveKekRecovery } from "../../core/crypto/unlock.js";
 import { aadForMak, aadForMakRecovery, aadForFolder } from "../../core/crypto/aad.js";
 import { wipeBytes } from "../../core/crypto/provider.js";
-
 import { cryptoProvider, keyring } from "./keyringSingleton.js";
 
 export const ROOT_FOLDER_ID = "root";
 
-/**
- * Create a random Recovery Key bytes (32 bytes).
- * You should display it to the user and make them confirm saving it.
- */
 export function generateRecoveryKeyBytes() {
   return cryptoProvider.randomBytes(32);
 }
 
-/**
-
- *
- * @param {{ userId:string, password:string, recoveryKeyBytes:Uint8Array }} args
- * @returns {Promise<{ keybundleInitPayload: any, rootFolderInitPayload: any, recoveryKey_b64?: string }>}
- */
 async function buildSignupInit({ userId, password, recoveryKeyBytes }) {
   if (!userId) throw new Error("buildSignupInit: userId required");
   if (!password) throw new Error("buildSignupInit: password required");
@@ -47,77 +28,86 @@ async function buildSignupInit({ userId, password, recoveryKeyBytes }) {
   const kekUnlock = await deriveKekUnlock(cryptoProvider, cs);
   wipeBytes(cs);
 
-  // 3) Derive KEK from recovery key
+  // 3) (Optional) derive KEK from recovery key (not sent to backend in your current backend schema)
   const kekRecovery = await deriveKekRecovery(cryptoProvider, recoveryKeyBytes);
 
-  // 4) Wrap MAK (password + recovery)
-  const wrapped_mak_password = await wrapBytesV1(
-    cryptoProvider,
+  // 4) Wrap MAK in the exact format backend expects:
+  //    wrapped_mak_b64 + wrapp_nonce_b64 (+ optional wrapp_tag_b64)
+  const makNonce = cryptoProvider.randomBytes(12);
+  const wrappedMakCtWithTag = await cryptoProvider.aesGcmEncrypt(
     kekUnlock,
     MAK,
+    makNonce,
     aadForMak(userId)
   );
 
-  const wrapped_mak_recovery = await wrapBytesV1(
-    cryptoProvider,
-    kekRecovery,
-    MAK,
-    aadForMakRecovery(userId)
-  );
-
-  wipeBytes(kekUnlock);
-  wipeBytes(kekRecovery);
+  // OPTIONAL: keep a local recovery-wrapped MAK for later UX (DO NOT send to backend /keybundle/init)
+  // You can remove this block if you don’t need it right now.
+  try {
+    const recNonce = cryptoProvider.randomBytes(12);
+    const wrappedRec = await cryptoProvider.aesGcmEncrypt(
+      kekRecovery,
+      MAK,
+      recNonce,
+      aadForMakRecovery(userId)
+    );
+    // store locally if you want (not used by backend currently)
+    void wrappedRec;
+    void recNonce;
+  } catch {}
 
   const keybundleInitPayload = {
     user_salt_b64: bytesToB64(userSalt),
-    wrapped_mak_password,
-    wrapped_mak_recovery,
-    kdf_v: 1,
+    wrapped_mak_b64: bytesToB64(wrappedMakCtWithTag),
+    wrapp_nonce_b64: bytesToB64(makNonce),
+    wrapp_tag_b64: null,          // tag is included in wrappedMakCtWithTag (WebCrypto)
+    wrapp_algo: "AES-256-GCM",
+    kdf_algo: "argon2id",
+    kdf_params: {
+      timeCost: 3,
+      memoryKiB: 65536,
+      parallelism: 1,
+      hashLen: 32,
+    },
+    version: 1,
   };
 
-  // 5) Create root FoK and wrap under MAK
-  // Root folder key version starts at 1
+  // 5) Root folder FoK wrapped under MAK (leave as you had, or update to your folder API schema)
   const rootKeyVersion = 1;
   const FoK_root = cryptoProvider.randomBytes(32);
 
   const rootAad = aadForFolder(userId, ROOT_FOLDER_ID, null, rootKeyVersion);
-  const wrapped_fok_root = await wrapBytesV1(
-    cryptoProvider,
-    MAK,
-    FoK_root,
-    rootAad
-  );
 
-  // Root folder init payload: backend may ignore folder_id and generate its own.
-  // If your backend expects numeric folder_id, set folder_id: null and let backend assign.
-  const rootFolderInitPayload = {
-    // folder_id: null, // optional; include only if your backend supports client-provided id
-    parent_id: null,
-    name: "My Drive",
-    key_version: rootKeyVersion,
-    wrapped_fok: wrapped_fok_root,
-    // If your backend needs to explicitly mark root:
-    // is_root: true,
-  };
+  // If your folder backend expects envelope, keep your existing wrapBytesV1 approach.
+  // Otherwise, you need to match that backend schema too.
+  const fokNonce = cryptoProvider.randomBytes(12);
+  const wrappedFokCtWithTag = await cryptoProvider.aesGcmEncrypt(MAK, FoK_root, fokNonce, rootAad);
 
+ const rootFolderInitPayload = {
+  folder_name: "My Drive",
+  parent_id: 0,                 // safer than null
+  key_version: rootKeyVersion,
 
-  // BUT sessionManager will still fetch bundle and unlock later; this is only for smooth UX.
-  // If you prefer strict flow, comment this out.
+  wrapped_fok_b64: bytesToB64(wrappedFokCtWithTag),
+  wrapp_nonce_b64: bytesToB64(fokNonce),
+  wrapp_tag_b64: null,
+  wrapp_algo: "AES-256-GCM",
+  version: 1,
+
+  entries: [],
+  chunk_size: 4 * 1024 * 1024,
+};
+
   try {
-    keyring.userId = userId; // only if your Keyring exposes userId; if not, ignore
-    // You can also leave it locked and let normal flow unlock after bundle fetch.
+    keyring.userId = userId;
   } catch {}
 
-  // Return recovery key as b64 so UI can show/store it (optional)
-  const recoveryKey_b64 = bytesToB64(recoveryKeyBytes);
-
-  // Wipe MAK only if you don't want it in memory before unlock.
-  // If you want to keep it for immediate use, keep it and rely on keyring unlocking later.
-  // For strictness, we wipe it here.
+  wipeBytes(kekUnlock);
+  wipeBytes(kekRecovery);
   wipeBytes(MAK);
   wipeBytes(FoK_root);
 
-  return { keybundleInitPayload, rootFolderInitPayload, recoveryKey_b64 };
+  return { keybundleInitPayload, rootFolderInitPayload };
 }
 
 export const cryptoBootstrap = {

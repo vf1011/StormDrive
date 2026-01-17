@@ -265,8 +265,8 @@ async def init_folder_upload(
         fus, root_id, root_name, plans = await _folder_folder_service.init_folder_upload(
                 session=session,
                 user_id=user.user_id,
-                root_folder_name=payload.root_folder_name,
-                parent_folder_id=payload.parent_folder_id,
+                folder_name=payload.root_folder_name,                 
+                parent_folder_id=payload.parent_folder_id or 0,
                 entries=payload.entries,
                 chunk_size=payload.chunk_size,
             )

@@ -14,8 +14,6 @@ from app.repositories.upload_chunk_repository import UploadChunkRepository
 from app.repositories.upload_session_repository import UploadSessionRepository
 from app.repositories.folder_repository import FolderRepository
 
-
-from app.services.upload_service import UploadServices
 from app.security.name_validator import _validate_name
 
 from app.schemas.dash_schema import FolderUploadChildFile
@@ -47,6 +45,17 @@ class FolderUploadServices:
         self.session_ttl_hours = cfg.folder_session_ttl_hours
         self.max_entries = cfg.folder_max_entries
 
+    def chunk_size(self, requested: Optional[int]) -> int:
+        if requested is None:
+            return self.default_chunk
+        return max(self.min_chunk, min(self.max_chunk, int(requested)))
+    
+    def total_chunk_size(self, file_size:int , chunk_size:int) -> int:
+        if file_size == 0 :
+            return 1
+        return (file_size + chunk_size - 1) // chunk_size
+    
+
     def _rename_file_in_folder(self, base: str, counter: int) -> str:
         base = _validate_name(base)
         if counter <= 0:
@@ -60,10 +69,10 @@ class FolderUploadServices:
         if len(entries) > self.max_entries:
             raise ValueError("Too many entries in one folder upload")
 
-        chunk_s =  UploadServices.chunk_size(chunk_size)
+        chunk_s =  self.chunk_size(chunk_size)
 
         parent_folder: Optional[Folder] = None
-        if parent_folder is not None:
+        if parent_folder is not (None,0):
             parent_folder = await self.folder_repo.get_active_folder(session, user_id=user_id,folder_id=parent_folder_id)
             if not parent_folder:
                 raise FileNotFoundError("Parent folder not found.")
@@ -84,7 +93,7 @@ class FolderUploadServices:
             if entry.file_size is None or entry.file_type is None:
                 raise ValueError("file_size and file_type required for file entries.")
 
-            rel_dir = Tuple[parts[:-1]]
+            rel_dir = Tuple(parts[:-1])
             fname = parts[-1]
             rel_path = "/".join(parts)
             file_entries.append((rel_dir, fname, int(entry.file_size), str(entry.file_type), rel_path))   
@@ -96,7 +105,7 @@ class FolderUploadServices:
         folder_map = await self.tree_repo.create_subfolders(session, user_id, root, dir_paths)
 
         name_used : Dict[Tuple[int,str],int] = {}
-        fileplan = List[FolderUploadChildFile]
+        fileplan = List[FolderUploadChildFile] = []
         items: List[UploadItems] = []
 
         folder_session = UploadFolderSession(
@@ -118,7 +127,7 @@ class FolderUploadServices:
             name_used[key] = name_used.get(key, -1) + 1
             resolved_name = self._rename_file_in_folder(base_name, name_used[key])
 
-            total_chunks = UploadServices.total_chunk_size(fsize, chunk_s)
+            total_chunks = self.total_chunk_size(fsize, chunk_s)
 
             upload = UploadSession(
                 user_id=user_id,

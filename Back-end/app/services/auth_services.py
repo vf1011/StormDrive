@@ -1,6 +1,6 @@
 from fastapi import HTTPException , status as http_status
 from app.schemas.auth_schema import UserSignUp , AuthResponse  , UserLogin , ActivityType , Token , User, SSRequest, SSResponse
-from app.api.dependencies import log_activity
+# from app.api.dependencies import log_activity
 from supabase import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession 
 from app.services.auth_security_service import auth_security_service
@@ -48,11 +48,11 @@ class AuthService:
                             )
                 raise HTTPException(status_code=http_status.HTTP_400_BAD_REQUEST, detail=response.error.message)
 
-            await log_activity(
-                user_id = response.user.id,
-                activity_type = ActivityType.SIGNUP,
-                supabase = supabase
-            )
+            # await log_activity(
+            #     user_id = response.user.id,
+            #     activity_type = ActivityType.SIGNUP,
+            #     supabase = supabase
+            # )
             
             log.info("User Signup Successful",
                     request_id=request_id,
@@ -93,11 +93,11 @@ class AuthService:
                             )
                 raise HTTPException(status_code=http_status.HTTP_400_BAD_REQUEST, detail=response.error.message)
 
-            await log_activity(
-                user_id=response.user.id,
-                activity_type=ActivityType.LOGIN,
-                supabase=supabase
-            )
+            # await log_activity(
+            #     user_id=response.user.id,
+            #     activity_type=ActivityType.LOGIN,
+            #     supabase=supabase
+            # )
 
             totp_enabled = await auth_security_service.is_totp_enabled(
                 db_session, response.user.id

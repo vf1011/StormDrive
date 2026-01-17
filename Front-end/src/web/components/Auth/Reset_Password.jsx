@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ✅ keep your existing supabase import (you already use it)
-import { supabase } from "../supabase";
+import { supabase } from "../../../supabase.jsx";
 
 // ✅ your app auth singleton
 import { ensureAuthStarted, getAppAuth } from "../../auth/appAuthClient";

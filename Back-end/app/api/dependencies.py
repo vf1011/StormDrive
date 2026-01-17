@@ -58,33 +58,33 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         print(f"Authentication Error: {str(e)} ")
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail = "Could Not Validated Your Credentials")
 
-async def log_activity(user_id:str , activity_type:ActivityType , supabase : Optional[AsyncClient] = None, activity_data :Dict = None):
-    """Logs user activity in the database
+# async def log_activity(user_id:str , activity_type:ActivityType , supabase : Optional[AsyncClient] = None, activity_data :Dict = None):
+#     """Logs user activity in the database
 
-    Args:
-        user_id (str): The ID of the user performing the activity.
-        activity_type (ActivityType): The type of activity being logged.
-        supabase (Optional[AsyncClient], optional): The Supabase client instance. Defaults to None.
-        activity_data (Dict, optional): Additional data to store with the activity. Defaults to None.
+#     Args:
+#         user_id (str): The ID of the user performing the activity.
+#         activity_type (ActivityType): The type of activity being logged.
+#         supabase (Optional[AsyncClient], optional): The Supabase client instance. Defaults to None.
+#         activity_data (Dict, optional): Additional data to store with the activity. Defaults to None.
 
-    Returns:
-        bool: True if the activity was successfully logged, False otherwise.
-    """
-    try:
-        if supabase is None:
-            supabase = await get_async_supabase()
+#     Returns:
+#         bool: True if the activity was successfully logged, False otherwise.
+#     """
+#     try:
+#         if supabase is None:
+#             supabase = await get_async_supabase()
 
-        activity = {
-            "user_id":user_id,
-            "activity_type":activity_type.value,
-            "activity_data":activity_data or {},
-        }
+#         activity = {
+#             "user_id":user_id,
+#             "activity_type":activity_type.value,
+#             "activity_data":activity_data or {},
+#         }
         
-        await supabase.table("user_activity").insert(activity).execute()
-        return True
-    except Exception as e:
-        print(f"Error logging activity: {str(e)}")
-        return False
+#         await supabase.table("user_activity").insert(activity).execute()
+#         return True
+#     except Exception as e:
+#         print(f"Error logging activity: {str(e)}")
+#         return False
     
 
 async def require_keybundle(
