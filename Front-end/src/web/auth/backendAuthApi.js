@@ -1,5 +1,5 @@
 // src/web/auth/backendAuthApi.js
-import { API_BASE_URL } from "../../api/config";
+import { API_BASE_URL } from "../api/config.js";
 
 async function jsonOrEmpty(res) {
   return res.json().catch(() => ({}));

@@ -95,14 +95,20 @@ export function createSessionManager({
    *
    * This keeps your flow correct: no uploads before keybundle + root FoK exist.
    */
- const completeSignupCrypto = async ({ password, recoveryKeyBytes }) => {
+const isCode = (err, code) =>
+  err?.data?.detail?.code === code ||
+  (typeof err?.message === "string" && err.message.includes(code));
+
+const completeSignupCrypto = async ({ password, recoveryKeyBytes }) => {
   const a = requireAuthenticated();
   const token = auth.getAccessToken?.() || a.session?.accessToken;
   if (!token) throw new Error("Missing access token");
 
   if (!cryptoBootstrap) throw new Error("cryptoBootstrap not provided to sessionManager");
   if (!keyBundleApi?.init) throw new Error("keyBundleApi.init not provided to sessionManager");
-  if (!folderApi?.bootstrapDefaults) throw new Error("folderApi.bootstrapDefaults not provided to sessionManager");
+
+  const folderBootstrap = folderApi?.bootstrapDefaults;
+  if (!folderBootstrap) throw new Error("bootstrapDefaults not wired: signup must call /folder/bootstrap-defaults");
 
   const userId = a.user?.id || a.session?.user?.id;
   if (!userId) throw new Error("Missing user id");
@@ -110,13 +116,31 @@ export function createSessionManager({
   const { keybundleInitPayload, bootstrapDefaultsPayload } =
     await cryptoBootstrap.buildSignupInit({ userId, password, recoveryKeyBytes });
 
-  await keyBundleApi.init(token, keybundleInitPayload);
+  // ✅ Keybundle init (ignore KEYBUNDLE_EXISTS)
+  try {
+    await keyBundleApi.init(token, keybundleInitPayload);
+  } catch (e) {
+    if (!isCode(e, "KEYBUNDLE_EXISTS")) throw e;
+  }
 
-  // Option-1: creates root + defaults + stores wrapped FK/FOK (idempotent)
-  await folderApi.bootstrapDefaults(token, bootstrapDefaultsPayload);
+  // ✅ Folder bootstrap (do same if your backend returns “already exists” codes)
+try {
+  await folderBootstrap(token, bootstrapDefaultsPayload);
+} catch (e) {
+  // If your backend has an "already bootstrapped" code, ignore it like KEYBUNDLE_EXISTS
+  // Otherwise, throw.
+  // Example ignore list (change once you know your backend codes):
+  if (isCode(e, "ROOT_EXISTS") || isCode(e, "DEFAULTS_EXISTS") || isCode(e, "ALREADY_EXISTS")) {
+    // ok, continue
+  } else {
+    throw e;
+  }
+}
 
   return { ok: true };
 };
+
+
 
 
   const logout = async () => {

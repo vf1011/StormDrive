@@ -99,6 +99,9 @@ export function createAuthManager({ authAdapter, backendAuth }) {
     return { mfaRequired: false, require_2fa: false };
   };
 
+  const login = async ({ email, password }) => loginWithPassword(email, password);
+
+
   const verifyTotp = async (code) => {
     const digits = (code || "").replace(/\D/g, "").slice(0, 6);
     if (digits.length !== 6) throw new Error("Enter 6 digits");
@@ -157,6 +160,7 @@ const register = async ({ name, email, password, confirmPassword }) => {
     refreshSession,
 
     loginWithPassword,
+    login,
     verifyTotp,
     verifyEmailOtp,
     register,

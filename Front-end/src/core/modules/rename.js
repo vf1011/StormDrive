@@ -1,4 +1,4 @@
-import { renameFileApi } from ".../../web/api/filesapi";
+import { renameFileApi } from "../../web/api/filesapi";
 import { renameFolderApi } from "../../web/api/folderapi";
 
 export function validateRenameName(newName, currentName) {

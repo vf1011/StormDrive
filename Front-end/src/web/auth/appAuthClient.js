@@ -1,16 +1,15 @@
-// src/web/auth/appAuthClient.js
-import { createAppAuth } from "./bootStrap";
+// src/auth/appAuthClient.js
+import { createAppAuth } from "./bootstrap"; // IMPORTANT: must point to the file that has bootstrapDefaults wired
 
-const appAuth = createAppAuth();
-let started = false;
-
-export async function ensureAuthStarted() {
-  if (started) return appAuth;
-  started = true;
-  await appAuth.session.init();
-  return appAuth;
-}
+let app = null;
+let initPromise = null;
 
 export function getAppAuth() {
-  return appAuth;
+  if (!app) app = createAppAuth();
+  return app;
+}
+
+export function ensureAuthStarted() {
+  if (!initPromise) initPromise = getAppAuth().session.init();
+  return initPromise;
 }

@@ -2,7 +2,7 @@ import logging , os
 import base64
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from typing import List, Dict , Optional
+from typing import List, Dict , Optional,Any
 from app.repositories.folder_repository import FolderRepository
 from app.repositories.undo_redo_repository import UndoRedoRepository
 from app.repositories.file_repository import FileRepository
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class FolderService:
     def __init__(self, folder_repo: FolderRepository, undo_repo: UndoRedoRepository, file_repo: FileRepository, trash_repo:RecyclebinRepository, 
-                 upload_root:str, recycle_root:str,key_repo : FolderKeysRepository):
+                 key_repo : FolderKeysRepository,upload_root:str, recycle_root:str):
         self.folder_repo = folder_repo
         self.undo_repo = undo_repo
         self.file_repo = file_repo
@@ -368,7 +368,7 @@ class FolderService:
 
         return {"deleted_folders": deleted_ids, "failed_folders": failed_ids}
     
-    async def restore_folders(self, session:AsyncSession, user_id:str, folder_ids:List[int]) -> List[str,List[dict]]:
+    async def restore_folders(self, session:AsyncSession, user_id:str, folder_ids:List[int]) -> Dict[str, List[Dict[str, Any]]]:
         if not folder_ids:
             raise ValueError("Folder ids not Found.")
         
@@ -418,7 +418,7 @@ class FolderService:
 
         return {"deleted_folders": restore_ids, "failed_folders": failed_ids}
     
-    async def permanent_folders(self, session:AsyncSession, user_id:str, folder_ids:List[int]) -> List[str,List[dict]] :
+    async def permanent_folders(self, session:AsyncSession, user_id:str, folder_ids:List[int]) ->Dict[str, List[Dict[str, Any]]] :
         if not folder_ids:
             raise ValueError("Folder ids not Found.")
         

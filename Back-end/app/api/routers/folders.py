@@ -22,6 +22,7 @@ from app.repositories.upload_session_repository import UploadSessionRepository
 from app.repositories.upload_chunk_repository import UploadChunkRepository
 from app.repositories.file_repository import FileRepository
 from app.repositories.trash_repository import RecyclebinRepository
+from app.repositories.folder_key_repository import FolderKeysRepository
 from app.storage.chunk_storage import ChunkStorage
 
 from app.services.folder_services import FolderService
@@ -38,7 +39,7 @@ router = APIRouter(prefix="/folder", tags=["folders"])
 UPLOAD_ROOT = os.getenv("UPLOAD_ROOT", str(Path("storage/uploads").resolve()))
 RECYCLE_ROOT = os.getenv("RECYCLE_ROOT", str(Path("storage/recyclebin").resolve()))
 
-_folder_service = FolderService(FolderRepository(),UndoRedoRepository(),FileRepository(),RecyclebinRepository(),upload_root=UPLOAD_ROOT,recycle_root=RECYCLE_ROOT)
+_folder_service = FolderService(FolderRepository(),UndoRedoRepository(),FileRepository(),RecyclebinRepository(),FolderKeysRepository(),upload_root=UPLOAD_ROOT,recycle_root=RECYCLE_ROOT)
 
 folder_repo = FolderRepository()
 tree_repo = FolderTreeRepository(folder_repo)

@@ -129,8 +129,8 @@ async function buildSignupInit({
     const fk = genKey32();
     const fok = genKey32();
 
-    const aadRootFK  = aadForFolderKey(userId, rootUid, null, keyVersion, "FK");
-    const aadRootFOK = aadForFolderKey(userId, rootUid, null, keyVersion, "FOK");
+    const aadChildFK  = aadForFolderKey(userId, uid, rootUid, keyVersion, "FK");
+    const aadChildFOK = aadForFolderKey(userId, uid, rootUid, keyVersion, "FOK");
 
     const fkNonce = cryptoProvider.randomBytes(12);
     const fokNonce = cryptoProvider.randomBytes(12);
@@ -139,14 +139,14 @@ async function buildSignupInit({
       wrappingKey32: rootFOK,
       plaintextKey32: fk,
       nonce12: fkNonce,
-      aadBytes: aadFK,
+      aadBytes: aadChildFK,
     });
 
     const wrapped_fok = await wrapKeyGcm({
       wrappingKey32: rootFOK,
       plaintextKey32: fok,
       nonce12: fokNonce,
-      aadBytes: aadFOK,
+      aadBytes: aadChildFOK,
     });
 
     children.push({

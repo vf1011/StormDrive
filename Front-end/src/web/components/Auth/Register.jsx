@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { bytesToB64 } from "../../../core/crypto/base64";
 import { cryptoBootstrap } from "../../auth/cryptoBootstrap";
-import { bootstrapDefaults } from "../../api/defaultFolders";
 
 import Notification from "../Transitions/Notification";
 import Modal from "./Modal";
@@ -143,7 +142,7 @@ Keep this safe. If you lose it and forget your password, your files cannot be re
       await sessionMgr.completeSignupCrypto({ password, recoveryKeyBytes: rkBytes });
       await sessionMgr.unlockVaultWithPassword(password);
 
-      // 4) Save RK without blocking UI (auto-download file)
+      // // 4) Save RK without blocking UI (auto-download file)
       downloadRecoveryKeyFile(cleanEmail, rkB64);
 
       setNotification({

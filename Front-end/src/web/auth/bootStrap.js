@@ -1,4 +1,3 @@
-// src/web/auth/bootstrap.js
 import { createAuthManager } from "../../core/auth/authManager.js";
 import { createVaultManager } from "../../core/auth/vaultManager.js";
 import { createSessionManager } from "../../core/auth/sessionManager.js";
@@ -7,10 +6,10 @@ import { supabaseAuthProvider } from "./supabaseAuthProvider.js";
 import { createBackendAuthApi } from "./backendAuthApi.js";
 
 import { keybundleInit, getKeybundle } from "../api/keybundleAPI.js";
-import { initFolderApi } from "../api/folderapi.js";
+import { bootstrapDefaultsApi  } from "../api/folderapi.js"; // <-- import both if you want
 
 import { keyring } from "./keyringSingleton.js";
-import { cryptoBootstrap } from "./cryptoBootstrap.js"; // ✅ ensure file name matches
+import { cryptoBootstrap } from "./cryptoBootstrap.js";
 
 export function createAppAuth() {
   const getAccessToken = async () => {
@@ -20,30 +19,20 @@ export function createAppAuth() {
 
   const backendAuth = createBackendAuthApi({ getAccessToken });
 
-  const auth = createAuthManager({
-    authAdapter: supabaseAuthProvider,
-    backendAuth,
-  });
-
+  const auth = createAuthManager({ authAdapter: supabaseAuthProvider, backendAuth });
   const vault = createVaultManager({ keyring });
 
   const folderApi = {
-    initFolder: (token, payload) => initFolderApi({ token, payload }),
+    bootstrapDefaults: (token, payload) => bootstrapDefaultsApi({ token, payload }),
+    // keep this only if dashboard still uses it:
   };
 
-  // ✅ the object shape SessionManager expects
   const keyBundleApi = {
     getBundle: (token) => getKeybundle(token),
     init: (token, payload) => keybundleInit(token, payload),
   };
 
-  const session = createSessionManager({
-    auth,
-    vault,
-    keyBundleApi, // ✅ not keybundleInit
-    folderApi,
-    cryptoBootstrap, // ✅ spelling consistent everywhere
-  });
+  const session = createSessionManager({ auth, vault, keyBundleApi, folderApi, cryptoBootstrap });
 
   return { auth, vault, session };
 }
