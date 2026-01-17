@@ -95,27 +95,29 @@ export function createSessionManager({
    *
    * This keeps your flow correct: no uploads before keybundle + root FoK exist.
    */
-  const completeSignupCrypto = async ({ password, recoveryKeyBytes }) => {
-    const a = requireAuthenticated();
-    const token = auth.getAccessToken?.() || a.session?.accessToken;
-    if (!token) throw new Error("Missing access token");
+ const completeSignupCrypto = async ({ password, recoveryKeyBytes }) => {
+  const a = requireAuthenticated();
+  const token = auth.getAccessToken?.() || a.session?.accessToken;
+  if (!token) throw new Error("Missing access token");
 
-    if (!cryptoBootstrap) throw new Error("cryptoBootstrap not provided to sessionManager");
-    if (!folderApi?.initFolder) throw new Error("folderApi.initFolder not provided to sessionManager");
+  if (!cryptoBootstrap) throw new Error("cryptoBootstrap not provided to sessionManager");
+  if (!keyBundleApi?.init) throw new Error("keyBundleApi.init not provided to sessionManager");
+  if (!folderApi?.bootstrapDefaults) throw new Error("folderApi.bootstrapDefaults not provided to sessionManager");
 
-    const userId = a.user?.id || a.session?.user?.id;
-    if (!userId) throw new Error("Missing user id");
+  const userId = a.user?.id || a.session?.user?.id;
+  if (!userId) throw new Error("Missing user id");
 
-    const { keybundleInitPayload } = await cryptoBootstrap.buildSignupInit({
-        userId,
-        password,
-        recoveryKeyBytes,
-      });
+  const { keybundleInitPayload, bootstrapDefaultsPayload } =
+    await cryptoBootstrap.buildSignupInit({ userId, password, recoveryKeyBytes });
 
-    await keyBundleApi.init(token, keybundleInitPayload);
+  await keyBundleApi.init(token, keybundleInitPayload);
 
-    return { ok: true };
-  };
+  // Option-1: creates root + defaults + stores wrapped FK/FOK (idempotent)
+  await folderApi.bootstrapDefaults(token, bootstrapDefaultsPayload);
+
+  return { ok: true };
+};
+
 
   const logout = async () => {
     vault.lock();
