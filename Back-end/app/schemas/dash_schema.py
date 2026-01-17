@@ -4,6 +4,20 @@ from uuid import UUID
 from datetime import datetime
 from pydantic import ConfigDict
 
+class DefaultFolderEntry(BaseModel):
+    folder_name: str
+    parent_folder_id: Optional[int] = None  # root = None/0
+    key_version: int = 1
+
+    wrapped_fok_b64: str
+    wrapp_nonce_b64: str
+    wrapp_tag_b64: Optional[str] = None
+    wrapp_algo: str = "AES-256-GCM"
+    version: int = 1
+
+class BootstrapDefaultFoldersRequest(BaseModel):
+    entries: List[DefaultFolderEntry]
+    
 class UploadRequest(BaseModel):
     file_name: str
     file_type: str 

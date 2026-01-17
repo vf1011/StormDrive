@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { bytesToB64 } from "../../../core/crypto/base64";
-import { cryptoBootstrap } from "../../auth/cryptoBootstrap.js";
+import { cryptoBootstrap } from "../../auth/cryptoBootstrap";
+import { bootstrapDefaults } from "../../api/defaultFolders";
 
 import Notification from "../Transitions/Notification";
 import Modal from "./Modal";

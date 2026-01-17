@@ -1,7 +1,7 @@
 import logging
 from typing import Optional , List, Tuple
 
-from sqlalchemy import select, func, update, delete, Text
+from sqlalchemy import select, func, update, delete, Text, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import false
 from datetime import datetime
@@ -47,7 +47,16 @@ class FolderRepository:
 
         res = await session.execute(stmt)
         return res.scalar_one_or_none() is not None
-    
+    async def list_root_folders(self, session: AsyncSession, user_id: str) -> List[Folder]:
+        stmt = (
+            select(Folder)
+            .where(Folder.user_id == user_id)
+            .where(or_(Folder.parent_folder_id.is_(None), Folder.parent_folder_id == 0))
+            .where(Folder.is_deleted.is_(False))
+            .order_by(Folder.created_at.desc(), Folder.folder_id.desc())
+        )
+        res = await session.execute(stmt)
+        return list(res.scalars().all())
     async def get_active_folders_by_ids(
         self,
         session: AsyncSession,

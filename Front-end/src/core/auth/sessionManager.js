@@ -106,15 +106,13 @@ export function createSessionManager({
     const userId = a.user?.id || a.session?.user?.id;
     if (!userId) throw new Error("Missing user id");
 
-    const { keybundleInitPayload, rootFolderInitPayload } =
-      await cryptoBootstrap.buildSignupInit({
+    const { keybundleInitPayload } = await cryptoBootstrap.buildSignupInit({
         userId,
         password,
         recoveryKeyBytes,
       });
 
     await keyBundleApi.init(token, keybundleInitPayload);
-    await folderApi.initFolder(token, rootFolderInitPayload);
 
     return { ok: true };
   };

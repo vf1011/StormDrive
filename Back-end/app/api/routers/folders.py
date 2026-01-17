@@ -66,6 +66,26 @@ def _user_id(user: User) -> str:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user context")
     return str(uid)
 
+@router.get("/list")
+async def list_root_folders(current_user=Depends(get_current_user), session=Depends(get_db)):
+    try:
+        uid = _user_id(current_user)
+        roots = await _folder_service.list_root_folders(session, user_id=uid)
+
+        return {
+            "success": True,
+            "needs_bootstrap": len(roots) == 0,
+            "folders": [f.to_dict(include_sensitive_data=True) for f in roots],
+        }
+    except ValueError as e:
+        logger.info("folder list validation failed", extra={"user_id": uid})
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+    except FileExistsError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 @router.post("/rename", response_model=FolderRenameResponse)
 async def rename_folder(

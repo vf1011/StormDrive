@@ -49,6 +49,28 @@ async function hkdfExpand(prk, info, len) {
   return okm.slice(0, len);
 }
 
+// ----------------------
+// NEW: AAD normalization
+// ----------------------
+const _te = new TextEncoder();
+
+/** @param {string|Uint8Array|ArrayBuffer|ArrayBufferView|null|undefined} x */
+function toBytes(x) {
+  if (x == null) return undefined;
+
+  if (typeof x === "string") return _te.encode(x);
+
+  if (x instanceof Uint8Array) return x;
+
+  if (x instanceof ArrayBuffer) return new Uint8Array(x);
+
+  if (ArrayBuffer.isView(x)) {
+    return new Uint8Array(x.buffer, x.byteOffset, x.byteLength);
+  }
+
+  throw new Error("Unsupported AAD type; use string, Uint8Array, or ArrayBuffer");
+}
+
 export class WebCryptoProvider {
   randomBytes(len) {
     const out = new Uint8Array(len);
@@ -62,7 +84,7 @@ export class WebCryptoProvider {
       pass: passwordUtf8,
       salt,
       time: params.timeCost,
-      mem: params.memoryKiB,        // KiB
+      mem: params.memoryKiB, // KiB
       parallelism: params.parallelism,
       hashLen: params.hashLen,
       type: argon2.ArgonType.Argon2id,
@@ -82,9 +104,15 @@ export class WebCryptoProvider {
 
   async aesGcmEncrypt(keyBytes, plaintext, nonce, aad) {
     if (!hasWebCrypto()) throw new Error("WebCrypto unavailable");
-    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-GCM" },
+      false,
+      ["encrypt"]
+    );
     const ct = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: nonce, additionalData: aad || undefined },
+      { name: "AES-GCM", iv: nonce, additionalData: toBytes(aad) },
       key,
       plaintext
     );
@@ -93,9 +121,15 @@ export class WebCryptoProvider {
 
   async aesGcmDecrypt(keyBytes, ciphertext, nonce, aad) {
     if (!hasWebCrypto()) throw new Error("WebCrypto unavailable");
-    const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-GCM" },
+      false,
+      ["decrypt"]
+    );
     const pt = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: nonce, additionalData: aad || undefined },
+      { name: "AES-GCM", iv: nonce, additionalData: toBytes(aad) },
       key,
       ciphertext
     );

@@ -1,37 +1,54 @@
 // src/web/auth/cryptoBootstrap.js
-// Web-only crypto bootstrap used by sessionManager.completeSignupCrypto().
-// Responsibilities:
-// - Generate userSalt + MAK
-// - Wrap MAK for password + recovery (keybundle/init payload)
-// - Create root folder FoK and wrap under MAK (folder/init-folder payload)
-//
-// This uses ONLY client-side crypto; backend stores only wrapped blobs.
 
-import { bytesToB64, b64ToBytes } from "../../core/crypto/base64.js";
-import { wrapBytesV1 } from "../../core/crypto/envelope.js";
+import { bytesToB64 } from "../../core/crypto/base64.js";
 import { deriveCs, deriveKekUnlock, deriveKekRecovery } from "../../core/crypto/unlock.js";
-import { aadForMak, aadForMakRecovery, aadForFolder } from "../../core/crypto/aad.js";
+import { aadForMak, aadForMakRecovery, aadForFolder , aadForFolderKey } from "../../core/crypto/aad.js";
 import { wipeBytes } from "../../core/crypto/provider.js";
 
-import { cryptoProvider, keyring } from "./keyringSingleton.js";
+import { cryptoProvider } from "./keyringSingleton.js";
+import { putFolderKeys, setRootFolderUid } from "./keyringSingleton.js";
 
-export const ROOT_FOLDER_ID = "root";
-
-/**
- * Create a random Recovery Key bytes (32 bytes).
- * You should display it to the user and make them confirm saving it.
- */
 export function generateRecoveryKeyBytes() {
   return cryptoProvider.randomBytes(32);
 }
 
-/**
+// UUID helper (no dependency)
+function uuidv4() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  const b = cryptoProvider.randomBytes(16);
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const hex = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
- *
- * @param {{ userId:string, password:string, recoveryKeyBytes:Uint8Array }} args
- * @returns {Promise<{ keybundleInitPayload: any, rootFolderInitPayload: any, recoveryKey_b64?: string }>}
+function genKey32() {
+  return cryptoProvider.randomBytes(32);
+}
+
+// Wrap a 32-byte key with AES-GCM under wrappingKey32
+async function wrapKeyGcm({ wrappingKey32, plaintextKey32, nonce12, aadBytes }) {
+  const ctWithTag = await cryptoProvider.aesGcmEncrypt(
+    wrappingKey32,
+    plaintextKey32,
+    nonce12,
+    aadBytes
+  );
+  return ctWithTag; // tag included in ctWithTag
+}
+
+/**
+ * Option-1 signup init:
+ * - keybundleInitPayload for /keybundle/init (your backend schema)
+ * - bootstrapDefaultsPayload for /folder/bootstrap-defaults (root + defaults + wrapped FK/FOK)
  */
-async function buildSignupInit({ userId, password, recoveryKeyBytes }) {
+async function buildSignupInit({
+  userId,
+  password,
+  recoveryKeyBytes,
+  rootName = "My Drive",
+  defaultNames = ["Documents", "Downloads", "Pictures", "Videos", "Music"],
+}) {
   if (!userId) throw new Error("buildSignupInit: userId required");
   if (!password) throw new Error("buildSignupInit: password required");
   if (!(recoveryKeyBytes instanceof Uint8Array) || recoveryKeyBytes.length < 16) {
@@ -40,84 +57,150 @@ async function buildSignupInit({ userId, password, recoveryKeyBytes }) {
 
   // 1) userSalt + MAK
   const userSalt = cryptoProvider.randomBytes(16);
-  const MAK = cryptoProvider.randomBytes(32);
+  const MAK = genKey32();
 
   // 2) Derive KEK from password
   const cs = await deriveCs(cryptoProvider, password, userSalt);
   const kekUnlock = await deriveKekUnlock(cryptoProvider, cs);
   wipeBytes(cs);
 
-  // 3) Derive KEK from recovery key
+  // 3) Recovery KEK (not sent to backend in your current schema)
   const kekRecovery = await deriveKekRecovery(cryptoProvider, recoveryKeyBytes);
 
-  // 4) Wrap MAK (password + recovery)
-  const wrapped_mak_password = await wrapBytesV1(
-    cryptoProvider,
+  // 4) Wrap MAK to match backend schema
+  const makNonce = cryptoProvider.randomBytes(12);
+  const wrappedMakCtWithTag = await cryptoProvider.aesGcmEncrypt(
     kekUnlock,
     MAK,
+    makNonce,
     aadForMak(userId)
   );
 
-  const wrapped_mak_recovery = await wrapBytesV1(
-    cryptoProvider,
-    kekRecovery,
-    MAK,
-    aadForMakRecovery(userId)
-  );
-
-  wipeBytes(kekUnlock);
-  wipeBytes(kekRecovery);
+  // optional local recovery-wrapped MAK (not sent to backend)
+  try {
+    const recNonce = cryptoProvider.randomBytes(12);
+    await cryptoProvider.aesGcmEncrypt(kekRecovery, MAK, recNonce, aadForMakRecovery(userId));
+  } catch {}
 
   const keybundleInitPayload = {
     user_salt_b64: bytesToB64(userSalt),
-    wrapped_mak_password,
-    wrapped_mak_recovery,
-    kdf_v: 1,
+    wrapped_mak_b64: bytesToB64(wrappedMakCtWithTag),
+    wrapp_nonce_b64: bytesToB64(makNonce),
+    wrapp_tag_b64: null,
+    wrapp_algo: "AES-256-GCM",
+    kdf_algo: "argon2id",
+    kdf_params: { timeCost: 3, memoryKiB: 65536, parallelism: 1, hashLen: 32 },
+    version: 1,
   };
 
-  // 5) Create root FoK and wrap under MAK
-  // Root folder key version starts at 1
-  const rootKeyVersion = 1;
-  const FoK_root = cryptoProvider.randomBytes(32);
+  // ---------- Option 1 folder bootstrap ----------
+  const keyVersion = 1;
 
-  const rootAad = aadForFolder(userId, ROOT_FOLDER_ID, null, rootKeyVersion);
-  const wrapped_fok_root = await wrapBytesV1(
-    cryptoProvider,
-    MAK,
-    FoK_root,
-    rootAad
-  );
+  // Root uid + keys
+  const rootUid = uuidv4();
+  const rootFK = genKey32();
+  const rootFOK = genKey32();
 
-  // Root folder init payload: backend may ignore folder_id and generate its own.
-  // If your backend expects numeric folder_id, set folder_id: null and let backend assign.
-  const rootFolderInitPayload = {
-    // folder_id: null, // optional; include only if your backend supports client-provided id
-    parent_id: null,
-    name: "My Drive",
-    key_version: rootKeyVersion,
-    wrapped_fok: wrapped_fok_root,
-    // If your backend needs to explicitly mark root:
-    // is_root: true,
+  // AAD separation for FK vs FOK (without changing aad.js)
+    const aadRootFK  = aadForFolderKey(userId, rootUid, null, keyVersion, "FK");
+    const aadRootFOK = aadForFolderKey(userId, rootUid, null, keyVersion, "FOK");
+
+  const rootFkNonce = cryptoProvider.randomBytes(12);
+  const rootFokNonce = cryptoProvider.randomBytes(12);
+
+  const wrapped_root_fk = await wrapKeyGcm({
+    wrappingKey32: MAK,
+    plaintextKey32: rootFK,
+    nonce12: rootFkNonce,
+    aadBytes: aadRootFK,
+  });
+
+  const wrapped_root_fok = await wrapKeyGcm({
+    wrappingKey32: MAK,
+    plaintextKey32: rootFOK,
+    nonce12: rootFokNonce,
+    aadBytes: aadRootFOK,
+  });
+
+  // Children defaults (wrapped by rootFOK)
+  const children = [];
+  for (const name of defaultNames) {
+    const uid = uuidv4();
+    const fk = genKey32();
+    const fok = genKey32();
+
+    const aadRootFK  = aadForFolderKey(userId, rootUid, null, keyVersion, "FK");
+    const aadRootFOK = aadForFolderKey(userId, rootUid, null, keyVersion, "FOK");
+
+    const fkNonce = cryptoProvider.randomBytes(12);
+    const fokNonce = cryptoProvider.randomBytes(12);
+
+    const wrapped_fk = await wrapKeyGcm({
+      wrappingKey32: rootFOK,
+      plaintextKey32: fk,
+      nonce12: fkNonce,
+      aadBytes: aadFK,
+    });
+
+    const wrapped_fok = await wrapKeyGcm({
+      wrappingKey32: rootFOK,
+      plaintextKey32: fok,
+      nonce12: fokNonce,
+      aadBytes: aadFOK,
+    });
+
+    children.push({
+      folder_uid: uid,
+      parent_folder_uid: rootUid,
+      folder_name: name,
+      key_version: keyVersion,
+      enc: {
+        wrapped_fk_b64: bytesToB64(wrapped_fk),
+        nonce_fk_b64: bytesToB64(fkNonce),
+        wrapped_fok_b64: bytesToB64(wrapped_fok),
+        nonce_fok_b64: bytesToB64(fokNonce),
+        wrapp_algo: "AES-256-GCM",
+        version: 1,
+      },
+    });
+
+    // keep plaintext in-memory for immediate UX
+    putFolderKeys(uid, fk, fok);
+  }
+
+  // keep root keys in-memory + store root pointer
+  setRootFolderUid(rootUid);
+  putFolderKeys(rootUid, rootFK, rootFOK);
+
+  const bootstrapDefaultsPayload = {
+    root: {
+      folder_uid: rootUid,
+      parent_folder_uid: null,
+      folder_name: rootName,
+      key_version: keyVersion,
+      enc: {
+        wrapped_fk_b64: bytesToB64(wrapped_root_fk),
+        nonce_fk_b64: bytesToB64(rootFkNonce),
+        wrapped_fok_b64: bytesToB64(wrapped_root_fok),
+        nonce_fok_b64: bytesToB64(rootFokNonce),
+        wrapp_algo: "AES-256-GCM",
+        version: 1,
+      },
+    },
+    children,
   };
 
+  // wipe sensitive intermediates
+  wipeBytes(kekUnlock);
+  wipeBytes(kekRecovery);
+  wipeBytes(MAK); // we already used it to wrap root FK/FOK
 
-  // BUT sessionManager will still fetch bundle and unlock later; this is only for smooth UX.
-  // If you prefer strict flow, comment this out.
-  try {
-    keyring.userId = userId; // only if your Keyring exposes userId; if not, ignore
-    // You can also leave it locked and let normal flow unlock after bundle fetch.
-  } catch {}
-
-  // Return recovery key as b64 so UI can show/store it (optional)
-  const recoveryKey_b64 = bytesToB64(recoveryKeyBytes);
-
-  // Wipe MAK only if you don't want it in memory before unlock.
-  // If you want to keep it for immediate use, keep it and rely on keyring unlocking later.
-  // For strictness, we wipe it here.
-  wipeBytes(MAK);
-  wipeBytes(FoK_root);
-
-  return { keybundleInitPayload, rootFolderInitPayload, recoveryKey_b64 };
+  return {
+    keybundleInitPayload,
+    bootstrapDefaultsPayload,
+    recoveryKey_b64: bytesToB64(recoveryKeyBytes),
+    root_folder_uid: rootUid,
+  };
 }
 
 export const cryptoBootstrap = {

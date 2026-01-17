@@ -140,3 +140,35 @@ export async function getFolderStatusApi({ token, folderId }) {
 export async function folderDownloadPlanApi({ token, body }) {
   return fetchJson(`${baseUrl}/folder/folders/plan`, { token, method: "POST", body });
 }
+
+// NEW: bootstrap defaults in one call (Option 1)
+export async function bootstrapDefaultsApi({ token, payload }) {
+  return fetchJson(`${baseUrl}/folder/bootstrap-defaults`, {
+    token,
+    method: "POST",
+    body: payload,
+  });
+}
+
+// NEW: rename using folder_uid
+export async function renameFolderUidApi({ token, folderUid, newName }) {
+  return fetchJson(`${baseUrl}/folder/rename`, {
+    token,
+    method: "POST",
+    body: { folder_uid: String(folderUid), new_folder_name: newName },
+  });
+}
+
+// NEW: move using folder_uid (crypto-safe)
+// You must rewrap moved folder's (FK + FOK) under new parent's FOK.
+export async function moveFoldersUidEncryptedApi({ token, moves }) {
+  // moves: [{ folder_uid, target_parent_uid, enc: { wrapped_fk_b64, nonce_fk_b64, wrapped_fok_b64, nonce_fok_b64, wrap_alg } }]
+  return fetchJson(`${baseUrl}/folder/move`, { token, method: "POST", body: { moves } });
+}
+
+// NEW: create folder using folder_uid + enc keys
+export async function createFolderUidApi({ token, payload }) {
+  // payload: { folder_uid, parent_folder_uid, name, enc: {...} }
+  return fetchJson(`${baseUrl}/folder/create`, { token, method: "POST", body: payload });
+}
+
